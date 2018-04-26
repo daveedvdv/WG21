@@ -96,6 +96,33 @@ int r2 = f(RN);  // Not a direct binding (temporary created).
 As with immediate functions, an immediate variable need never be seen by a back end.
 </p>
 
+<h4>Notes</h4>
+
+<p>
+The desire for functionality like this comes up regularly.  Sometimes, the motivation
+is to eliminate macros, and sometimes it just falls naturally out of the development
+process (e.g., helper functions meant to create nontype template argument values).
+</p>
+<p>
+The impetus for the present paper, however, is the work being done by SG7 in the
+realm of compile-time reflection.  There is now general agreement that future language
+support reflection should use constexpr functions, but since such function typically
+<i>have</i> to be evaluated at compile time, they will in fact likely be <tt>constexpr!</tt>
+functions.
+</p>
+<p>
+The general principles of this facility were first discussed in Kona (2017) as part
+of the discussion of P0595r0.  At the time, the following poll was recorded:
+<blockquote>
+	Provide a way to write a function that is guaranteed to be produce a constant
+	expression, violations diagnosed at call site? (Direction poll for do constexpr,
+	ignoring syntax):<br/>
+	SF: 8 | F: 13 | N: 2 | A: 0 | SA: 0
+</blockquote>
+(see http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0).
+</p>
+
+
 <h2>Wording changes (FIXME: Incomplete)</h2>
 
 <p>Add to the grammar of [dcl.spec] paragraph 1:</p>  
