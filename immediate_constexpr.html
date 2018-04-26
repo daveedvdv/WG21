@@ -102,15 +102,31 @@ As with immediate functions, an immediate variable need never be seen by a back 
 <blockquote style="padding-left: 30px;">
 	<i>decl-specifier</i>:<br/>
 	<tab><i>storage-class-specifier</i><br/>
-	<tab><i>defining-type-specifier</i>
-	<tab><i>function-specifier</i>
-	<tab><tt>friend</tt>
-	<tab><tt>typedef</tt>
-	<tab><tt>constexpr</tt>
-	<tab><ins><tt>constexpr!</tt></ins>
+	<tab><i>defining-type-specifier</i><br/>
+	<tab><i>function-specifier</i><br/>
+	<tab><tt>friend</tt><br/>
+	<tab><tt>typedef</tt><br/>
+	<tab><tt>constexpr</tt><br/>
+	<tab><ins><tt>constexpr!</tt></ins><br/>
 	<tab><tt>inline</tt>
 </blockquote>
 
+<p>Update [dcl.constexpr] paragraph 1 as follows:
+
+<blockquote style="padding-left: 30px;">
+	The <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifiers shall be applied only to the
+	definition of a variable or variable template or the declaration of a function or function template.
+	A function or static data member declared with the <tt>constexpr</tt> <ins>or
+	<tt>constexpr!</tt></ins>specifier is implicitly an inline function or variable (10.1.6). If any
+	declaration of a function or function template has a <tt>constexpr</tt> <ins> or
+	<tt>constexpr!</tt></ins>specifier, then all its declarations shall contain <del>the constexpr</del>
+	<ins>that same</ins> specifier. [ Note: An explicit specialization can differ from the template
+	declaration with respect to the <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier.
+	— end note ] [ Note: Function parameters cannot be declared <tt>constexpr</tt><ins> or
+	<tt>constexpr!</tt></ins>. — end note ]
+</blockquote>
+
+		
 <blockquote>Destructors (15.4) for initialized objects (that is, objects whose
 lifetime (6.8) has begun) with static storage duration <xins><ins>that
 do not have constant destruction</ins></xins>, and functions
