@@ -106,8 +106,8 @@ process (e.g., helper functions meant to create nontype template argument values
 <p>
 The impetus for the present paper, however, is the work being done by SG7 in the
 realm of compile-time reflection.  There is now general agreement that future language
-support reflection should use constexpr functions, but since such function typically
-<i>have</i> to be evaluated at compile time, they will in fact likely be <tt>constexpr!</tt>
+support for reflection should use constexpr functions, but since such functions typically
+<i>have</i> to be evaluated at compile time, they will in fact likely be <i>immediate</i>
 functions.
 </p>
 <p>
@@ -115,11 +115,12 @@ The general principles of this facility were first discussed in Kona (2017) as p
 of the discussion of P0595r0.  At the time, the following poll was recorded:
 <blockquote>
 	Provide a way to write a function that is guaranteed to be produce a constant
-	expression, violations diagnosed at call site? (Direction poll for do constexpr,
-	ignoring syntax):<br/>
+	expression, violations diagnosed at call site? (Direction poll for [immediate
+	functions], ignoring syntax):<br/>
 	SF: 8 | F: 13 | N: 2 | A: 0 | SA: 0
 </blockquote>
-(see http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0).
+(see http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0 ; the syntax under consideration
+at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 </p>
 
 
