@@ -96,7 +96,7 @@ int r2 = f(RN);  // Not a direct binding (temporary created).
 As with immediate functions, an immediate variable need never be seen by a back end.
 </p>
 
-<h2>Wording changes (FIXME: This is from another paper)</h2>
+<h2>Wording changes (FIXME: Incomplete)</h2>
 
 <p>Add to the grammar of [dcl.spec] paragraph 1:</p>  
 <blockquote style="padding-left: 30px;">
@@ -151,5 +151,17 @@ As with immediate functions, an immediate variable need never be seen by a back 
 	In any <del><tt>constexpr</tt></del><ins>constexpr</ins> variable declaration, the
 	full-expression of the initialization shall be a constant expression (8.6).
 </blockquote>
-	
+
+<p>Add a paragraph after paragraph 2 of [expr.prim.id]:</p>
+<blockquote style="padding-left: 30px;"><xins>
+	An <i>id-expression</i> that denotes an immediate variable ([dcl.constexpr]) is immediately
+	converted to a prvalue ([conv.lval]).
+</xins></blockquote>
+
+<p>Add a paragraph at the end of [expr.call]:</p>
+<blockquote style="padding-left: 30px;"><xins>
+	A call to an immediate function ([dcl.constexpr]) that does not lexically appear in the
+	<i>function-body</i> ([dcl.fct.def.general]) of an immediate function shall be a constant
+	expression ([expr.const]).
+</xins></blockquote>
 </body></html>
