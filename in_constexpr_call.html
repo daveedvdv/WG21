@@ -1,0 +1,174 @@
+<html>
+<head>
+<title>std::in_constexpr_call</title>
+<style type="text/css">
+blockquote.std { color: #000000; background-color: #F1F1F1;
+                 border: 1px solid #D1D1D1;
+                 padding-left: 0.5em; padding-right: 0.5em; }
+blockquote.stddel { text-decoration: line-through;
+                    color: #000000; background-color: #FFA0A0;
+                    border: 1px solid #ECD7EC;
+                    padding-left: 0.5em; padding-right: 0.5em; }
+
+blockquote.stdins { color: #000000; background-color: #A0FFA0;
+                    border: 1px solid #B3EBB3; padding: 0.5em; }
+
+
+ins { background-color:#A0FFA0; text-decoration: none }
+del { background-color:#FFA0A0; text-decoration: line-through; }
+#hidedel:checked ~ * del, #hidedel:checked ~ * del * { display:none; visibility:hidden }
+
+tab { padding-left: 4em; }
+</style>
+</head>
+<body>
+<p align=right>
+	<b>P0595R1, 2018-04-26</b>
+	<br/>EWG, LEWG
+</p>
+
+<p align=right>
+	<br/>Andrew Sutton (andrew.n.sutton@gmail.com)
+	<br/>Daveed Vandevoorde (daveed@edg.com)
+</p>
+
+<h1><tt>std::in_constexpr_call()</tt></h1>
+
+<h3>Introduction and Motivation</h3>
+
+<p>
+We propose a function that is predeclared as follows:
+</p>
+<pre><tt>
+namespace std {
+  constexpr bool in_constexpr_call();
+}
+</pre></tt>
+<p>
+Its purpose is to determine whether a function is evaluated at compile time
+or at run time.  While a function is being evaluated at compile time,
+<tt>std::in_constexpr_call()</tt> evaluates as a core constant expression
+with value <tt>true</tt>; otherwise, it evaluates to <tt>false</tt>.  
+</tt>
+</p>
+<p>
+For example:
+</p>
+<pre><tt>
+    constexpr double power(double b, int x) {
+      if (std::in_constexpr_call() && x >= 0) {
+        // A constant-evaluation context.
+        double r = 1.0, p = b;
+        unsigned u = (unsigned)x;
+        while (u != 0) {
+          if (u & 1) r *= p;
+          u /= 2;
+          p *= p;
+        }
+        return r;
+      } else {
+        // Let the code generator figure it out.
+        return std::pow(b, (double)x);
+      }
+    }
+    
+    constexpr double kilo = power(10.0, 3);  // (1)
+    int n = 3;
+    double mucho = power(10.0, n);  // (2)
+    double thousand() {
+      return power(10.0, 3);
+    }
+</pre></tt>
+    
+<p>
+Call (1) occurs in a constant-expression context, and, therefore,
+<tt>std::in_constexpr_call()</tt> will be <tt>true</tt> during the
+computation of <tt>power(10.0, 3)</tt>, which in turn allows the
+evaluation to complete as a constant-expression.
+</p>
+<p>
+Call (2) isn't a constant-expression because <tt>n</tt> cannot be
+converted to an rvalue in a constant-expression context. So it will
+be evaluated in a context where <tt>std::in_constexpr_call()</tt>
+is <tt>false</tt>; this is known at translation time, and the
+run-time code generated for the function can therefore easily be
+reduced to the equivalent of just
+</p>
+<pre><tt>
+    inline double power'(double b, int x) {
+      return std::pow(b, (double)x);
+    }
+</pre></tt>
+
+<p>
+Call (3) could go either way. The call is technically a
+constant-expression, but it need not be evaluated as one (it's not
+called in a context requiring a constant).  The expectation is that
+if the implementation attempts to evaluate the call at compile time,
+<tt>std::in_constexpr_call()</tt> will produce <tt>true</tt> and
+otherwise it will produce <tt>false</tt> (that also falls out of the
+most likely implementation strategies).
+</p>
+<p>
+While a call to <tt>std::in_constexpr_call()</tt> is a core
+constant expression, it is not a constant expression.  For example,
+the following is invalid:
+</p>
+<pre><tt>
+    constexpr void f() {
+      if constexpr (std::in_constexpr_call()) {  // Error!
+        // ...
+      }
+    }
+</pre></tt>
+
+<h4>Notes</h4>
+<p>
+The proposed function tests whether a currently evaluated function
+call is being evaluated at compile time.  Originally, we considered
+a slightly more general function that returned whether a currently
+evaluated <i>expression</i> (as opposed to <i>function call</i>) is
+being evaluated at compile time.  It turns out that such a query is
+ambiguous for certain C++ implementations (like Clang's) that
+handle constant expressions by just "tagging" them as opposed to
+"folding" them.  For example:
+</p>
+<pre><tt>
+    static_assert(std::in_constexpr_call());  // Error!
+</pre></tt>
+
+<p>
+As the example above shows, <tt>std::in_constexpr_call()</tt> is
+useful to enable alternative implementations of functions for
+compile time when the corresponding implementation for run time 
+would not comply to the constraints of core constant expressions.
+A forthcoming important special case of this principle is
+<tt>std::string</tt>: P0578 (already approved by EWG) enables
+constexpr destructors, allocation, and deallocation, which in
+principle allows for the support of constexpr container types.
+However, <tt>std::string</tt> implementations typically include
+a "short string optimization" that is unfriendly to the constexpr
+evaluation constraints: With the facility presented here, the
+implementation of <tt>std::string</tt> can avoid the short
+string optimization when evaluation happens at compile time.
+</p>
+
+<p>
+A previous version of this paper was presented in Kona (2017)
+using the special-purpose notation <tt>constexpr()</tt> instead
+of a (magic) library function.  The following two poll results were
+recorded at the time:
+<blockquote>
+	The constexpr operator as presented?<br/>
+	SF: 4 | F: 13 | N: 7 | A: 2 | SA: 2
+
+	Same feature with a magic library function?
+	SF: 5 | F: 12 | N: 5 | A: 2 | SA: 1
+</blockquote>
+</p>
+
+<h3>Wording Changes</h3>
+
+
+</body>
+</html>
