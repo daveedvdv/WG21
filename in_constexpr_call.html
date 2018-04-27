@@ -138,7 +138,7 @@ handle constant expressions by just "tagging" them as opposed to
 </pre></tt>
 
 <p>
-As the example above shows, <tt>std::in_constexpr_call()</tt> is
+As the introductory example shows, <tt>std::in_constexpr_call()</tt> is
 useful to enable alternative implementations of functions for
 compile time when the corresponding implementation for run time 
 would not comply to the constraints of core constant expressions.
@@ -151,17 +151,20 @@ a "short string optimization" that is unfriendly to the constexpr
 evaluation constraints: With the facility presented here, the
 implementation of <tt>std::string</tt> can avoid the short
 string optimization when evaluation happens at compile time.
+(In turn, the ability to produce <tt>std::string</tt> objects at
+compile time is expected to be beneficial for reflection
+interfaces.)
 </p>
 
 <p>
-A previous version of this paper was presented in Kona (2017)
-using the special-purpose notation <tt>constexpr()</tt> instead
-of a (magic) library function.  The following two poll results were
+A previous version of this paper was presented in Kona (2017) using
+the special-purpose notation <tt>constexpr()</tt> instead of a (magic)
+library function call.  The following two poll results were
 recorded at the time:
 <blockquote>
 	The constexpr operator as presented?<br/>
 	SF: 4 | F: 13 | N: 7 | A: 2 | SA: 2
-
+<br/>
 	Same feature with a magic library function?
 	SF: 5 | F: 12 | N: 5 | A: 2 | SA: 1
 </blockquote>
