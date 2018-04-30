@@ -57,21 +57,64 @@ constexpr int dblsqr(int n) {
 </code></pre>
 </p>
 <p>
-Finally, a glvalue cannot contain a pointer or reference to a <tt>constexpr!</tt>
-function:
+Finally, as is the case with a bound member function (e.g., "<tt>x.f</tt>"),
+a <tt>constexpr!</tt> function can only be called; no pointer or reference
+to it can be formed:
 
 <pre><code class="language-c++">using Int2Int = int(int);
-constexpr Int2Int* indirect() {
-  Int2Int *pf = (Int2Int*)sqr;  // Error.
-}
+Int2Int *pf = sqr;  // Error.
 </code></pre>
 </p>
 <p>
 One consequence of this specification is that an immediate function never needs
 to be seen by a back end.  (Its address can be taken, but that address cannot
 leak into the run time.)  That means that immediate functions are an alternative
-to many function-style macros.
+to many function-style macros.  It also means that, unlike plain <tt>constexpr</tt>
+functions, <tt>constexpr!</tt> functions are unlikely to show up in symbolic
+debuggers.  That runs into the broader issue that programmers currently have few
+tools to debug compile-time evaluation: This proposal does not aim at solving
+that problem in any way.
 </p>
+
+<h4>Source Locations</h4>
+<p>
+The "Library Fundamentals v. 2" TS contains a "magic" <tt>source_location</tt>
+class get to information similar to the <tt>__FILE__</tt> and <tt>__LINE__</tt>
+macros and the <tt>__func__</tt> variable (see
+<a href="https://wg21.link/n4529.html#reflection.src_loc">N4529</a> for the
+current draft, and <a href="https://wg21.link/n4129">N4129</a> for some design
+notes).  Unfortunately, because the "value" of a <tt>source_location</tt> is
+frozen at the point <tt>source_location::current()</tt> is invoked, composing
+code making use of this magic class is tricky: Typically, a function wanting to
+track its point of invocation has to add a defaulted parameter as follows:
+<pre><code class="language-c++">
+void my_log_function(char const *msg,
+                     source_location src_loc
+		                  = source_location::current()) {
+  // ...
+}
+</code></pre>
+This idiom ensure that the value of the <tt>source_location::current()</tt>
+invocation is sampled where <tt>my_log_function</tt> is called instead of
+where it is defined.
+</p>
+<p>
+Immediate (i.e., <tt>constexpr!</tt>) functions, however, create a clean separation
+between the compilation process and the constexpr evaluation process (see also P0992).
+Thus, we can make <tt>source_location::current()</tt> an immediate function, and wrap
+it as needed in other immediate functions: The value produced will correspond to the
+source location of the "root" immediate function call.  For example:
+<pre><code class="language-c++">
+constexpr! src_line() {
+  return source_location::current().line();
+}
+
+void some_code() {
+  std::cout << src_line() << '\n';  // This line number is output.
+}
+</code></pre>
+</p>
+
 
 <h4>Variables</h4>
 <p>
