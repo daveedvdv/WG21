@@ -167,7 +167,7 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 </p>
 
 
-<h2>Wording changes (FIXME: Incomplete)</h2>
+<h2>Wording changes</h2>
 
 <p>Add to the grammar of [dcl.spec] paragraph 1:</p>  
 <blockquote style="padding-left: 30px;">
@@ -203,7 +203,8 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 	that is not a constructor declares that function to be a <i>constexpr function</i>. Similarly, a
 	<tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier used in a constructor declaration
 	declares that constructor to be a <i>constexpr constructor</i>.<ins>  A function or constructor declared
-	with the <tt>constexpr!</tt> specifier is called an <i>immediate function</i>.</ins>
+	with the <tt>constexpr!</tt> specifier is called an <i>immediate function</i>. The
+	<tt>constexpr</tt> and <tt>constexpr!</tt> shall not both appear in a <i>decl-specifiers-seq</i>.</ins>
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 8 as follows:
@@ -226,7 +227,10 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 <p>Add a paragraph after paragraph 2 of [expr.prim.id]:</p>
 <blockquote style="padding-left: 30px;"><xins>
 	An <i>id-expression</i> that denotes an immediate variable ([dcl.constexpr]) is immediately
-	converted to a prvalue ([conv.lval]).
+	converted to a prvalue ([conv.lval]).  An <i>id-expression</i> that denotes an immediate
+	function ([dcl.constexpr]) and is not the right hand expression of a class member access
+	operation ([expr.ref]) can be used only as the, optionally parenthesized,
+	<i>postfix-expression</i> of a function call ([expr.call]).
 </xins></blockquote>
 
 <p>Add a paragraph at the end of [expr.call]:</p>
@@ -235,4 +239,20 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 	<i>function-body</i> ([dcl.fct.def.general]) of an immediate function shall be a constant
 	expression ([expr.const]).
 </xins></blockquote>
+
+<p>In bullet (4.3.2) of [expr.ref] paragraph 4, strike</p>
+<blockquote style="padding-left: 30px;">
+	<del>The expression can be used only as the left-hand operand of a member function call
+	(12.2.1). [Note: Any redundant set of parentheses surrounding the expression is ignored
+	(8.4). — end note ]</del>
+</blockquote>
+<p>and add to the end of bullet (4.3) of that same paragraph (after the two sub-bullets):</p>
+<blockquote style="padding-left: 30px;">
+	<ins>If <tt>E1.E2</tt> refers to a nonstatic member function ([class.mfct.non-static]) or
+	to an immediate function ([dcl.constexpr]) the expression can be used only as the left-hand
+	operand of a member function call (12.2.1). [Note: Any redundant set of parentheses
+	surrounding the expression is ignored (8.4). — end note ]</ins>
+</blockquote>
+		
+		
 </body></html>
