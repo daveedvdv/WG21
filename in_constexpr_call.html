@@ -172,6 +172,33 @@ recorded at the time:
 
 <h3>Wording Changes</h3>
 
+<p>Add a new section at the end of clause 21 [language.support]</p>
 
+<blockquote style="padding-left: 60px;"><xins>
+	<h3>21.12  Constexpr Support  [support.constexpr]</h3>
+
+	<h4>21.12.1 Constexpr evaluation context  [support.constexpr.in_constexpr_call]</h4>
+	
+	<ol>
+	<li><p>The following function is predefined in every translation unit:
+		<pre><tt>
+	namespace std {
+	  constexpr bool in_constexpr_call() {
+	    return <i>unspecified</i>;
+	  }
+	}
+</pre></tt>
+	</p></li>
+	<li><p><i>Returns:</i> <tt>true</tt> if the call appears inside the body of
+		a constexpr function and the current evaluation is in a context that
+		requires a constant expression.  <tt>false</tt> if the call does not
+		appear inside the body of a constexpr function or the current evaluation
+		does not produce a constant expression ([expr.const]).  In other
+		situations either <tt>true</tt> or <tt>false</tt>.  [ <i>Note:</i>
+		It is recommended that implementations return <tt>true</tt> when they
+		evaluate the call at compile time and <tt>false</tt> otherwise.
+		<i>&mdash end note ]
+	</ol>
+</xins></blockquote>
 </body>
 </html>
