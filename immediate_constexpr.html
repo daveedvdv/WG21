@@ -67,8 +67,7 @@ Int2Int *pf = sqr;  // Error.
 </p>
 <p>
 One consequence of this specification is that an immediate function never needs
-to be seen by a back end.  (Its address can be taken, but that address cannot
-leak into the run time.)  That means that immediate functions are an alternative
+to be seen by a back end.  That means that immediate functions are an alternative
 to many function-style macros.  It also means that, unlike plain <tt>constexpr</tt>
 functions, <tt>constexpr!</tt> functions are unlikely to show up in symbolic
 debuggers.  That runs into the broader issue that programmers currently have few
@@ -182,6 +181,12 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 	<tab><tt>inline</tt>
 </blockquote>
 
+<p>Append to [dcl.spec] paragraph 2:</p>  
+<blockquote style="padding-left: 30px;">
+	<ins>The <tt>constexpr</tt> and <tt>constexpr!</tt> shall not both appear in a
+	<i>decl-specifiers-seq</i>.</ins>
+</blockquote>
+
 <p>Update [dcl.constexpr] paragraph 1 as follows:
 
 <blockquote style="padding-left: 30px;">
@@ -203,8 +208,7 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 	that is not a constructor declares that function to be a <i>constexpr function</i>. Similarly, a
 	<tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier used in a constructor declaration
 	declares that constructor to be a <i>constexpr constructor</i>.<ins>  A function or constructor declared
-	with the <tt>constexpr!</tt> specifier is called an <i>immediate function</i>. The
-	<tt>constexpr</tt> and <tt>constexpr!</tt> shall not both appear in a <i>decl-specifiers-seq</i>.</ins>
+	with the <tt>constexpr!</tt> specifier is called an <i>immediate function</i>.</ins>
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 8 as follows:
@@ -229,7 +233,7 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 	An <i>id-expression</i> that denotes an immediate variable ([dcl.constexpr]) is immediately
 	converted to a prvalue ([conv.lval]).  An <i>id-expression</i> that denotes an immediate
 	function ([dcl.constexpr]) and is not the right hand expression of a class member access
-	operation ([expr.ref]) can be used only as the, optionally parenthesized,
+	operation ([expr.ref]) can be used only as the (possibly parenthesized)
 	<i>postfix-expression</i> of a function call ([expr.call]).
 </xins></blockquote>
 
@@ -254,5 +258,10 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 	surrounding the expression is ignored (8.4). — end note ]</ins>
 </blockquote>
 		
-		
+<p>Update [temp.explicit] paragraph 1 as follows:
+<blockquote style="padding-left: 30px;">
+	[...]An explicit instantiation of a function template, member function of a class template,
+	or variable template shall not use the <tt>inline</tt><del> or</del><ins>,</ins>
+	<tt>constexpr</tt><ins>, or <tt>constexpr!</tt> specifiers.
+</blockquote>
 </body></html>
