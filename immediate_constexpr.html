@@ -189,16 +189,16 @@ The syntax under consideration at that time was <tt>do constexpr</tt> instead of
 <p>Update [dcl.constexpr] paragraph 1 as follows:
 
 <blockquote style="padding-left: 30px;">
-	The <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier shall be applied only to the
-	definition of a variable or variable template or the declaration of a function or function template.
-	A function or static data member declared with the <tt>constexpr</tt> <ins>or
-	<tt>constexpr!</tt> </ins>specifier is implicitly an inline function or variable (10.1.6). If any
+	The <tt>constexpr</tt>specifier shall be applied only to the definition of a variable or
+	variable template or the declaration of a function or function template.
+	<ins>The <tt>constexpr!</tt>specifier shall be applied only to the definition of a
+	function or function template.	A function or static data member declared with the <tt>constexpr</tt>
+	<ins>or	<tt>constexpr!</tt> </ins>specifier is implicitly an inline function or variable (10.1.6). If any
 	declaration of a function or function template has a <tt>constexpr</tt> <ins> or
 	<tt>constexpr!</tt> </ins>specifier, then all its declarations shall contain <del>the constexpr</del>
 	<ins>that same</ins> specifier. [ Note: An explicit specialization can differ from the template
 	declaration with respect to the <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier.
-	— end note ] [ Note: Function parameters cannot be declared <tt>constexpr</tt><ins> or
-	<tt>constexpr!</tt></ins>. — end note ]
+	— end note ] [ Note: Function parameters cannot be declared <tt>constexpr</tt>. — end note ]
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 2 as follows:
@@ -216,24 +216,11 @@ The syntax under consideration at that time was <tt>do constexpr</tt> instead of
 	constexpr function or a constexpr constructor.
 </blockquote>
 
-<p>Update [dcl.constexpr] paragraph 9 as follows:
-<blockquote style="padding-left: 30px;">
-	A <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier used in an object declaration
-	declares the object as const. Such an object shall have literal type and shall be initialized.
-	<ins>A <i>constexpr variable</i> is a variable declared with a <tt>constexpr</tt> or
-	<tt>constexpr!</tt> specifier.  An <i>immediate variable</i> is a variable declared with a
-	<tt>constexpr!</tt> specifier.</ins>
-	In any <del><tt>constexpr</tt></del><ins>constexpr</ins> variable declaration, the
-	full-expression of the initialization shall be a constant expression (8.6).
-</blockquote>
-
 <p>Add a paragraph after paragraph 2 of [expr.prim.id]:</p>
 <blockquote style="padding-left: 30px;"><xins>
-	An <i>id-expression</i> that denotes an immediate variable (_dcl.constexpr_) is immediately
-	converted to a prvalue (_conv.lval_).  An <i>id-expression</i> that denotes an immediate
-	function (_dcl.constexpr_) and is not the right hand expression of a class member access
-	operation (_expr.ref_) can be used only as the (possibly parenthesized)
-	<i>postfix-expression</i> of a function call (_expr.call_).
+	An <i>id-expression</i> that denotes an immediate function (_dcl.constexpr_) and is not the
+	right hand expression of a class member access operation (_expr.ref_) can be used only as
+	the (possibly parenthesized) <i>postfix-expression</i> of a function call (_expr.call_).
 </xins></blockquote>
 
 <p>Add a paragraph at the end of [expr.call]:</p>
