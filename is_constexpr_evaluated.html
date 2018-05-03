@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>std::in_constexpr_call</title>
+<title>std::is_constexpr_evaluated</title>
 <style type="text/css">
 blockquote.std { color: #000000; background-color: #F1F1F1;
                  border: 1px solid #D1D1D1;
@@ -32,32 +32,30 @@ tab { padding-left: 4em; }
 	<br/>Daveed Vandevoorde (daveed@edg.com)
 </p>
 
-<h1 align="center"><tt>std::in_constexpr_call()</tt></h1>
+<h1 align="center"><tt>std::is_constexpr_evaluated()</tt></h1>
 
 <h3>Introduction and Motivation</h3>
 
 <p>
-We propose a function that is predeclared as follows:
-</p>
+We propose a "magical" library function that is predeclared
+as follows:
 <pre><tt>
 namespace std {
-  constexpr bool in_constexpr_call() noexcept;
+  constexpr bool is_constexpr_evaluated() noexcept;
 }
 </pre></tt>
-<p>
-Its purpose is to determine whether a function is evaluated at compile time
-or at run time.  While a function is being evaluated at compile time,
-<tt>std::in_constexpr_call()</tt> evaluates as a core constant expression
-with value <tt>true</tt>; otherwise, it evaluates to <tt>false</tt>.  
-</tt>
+(No standard header inclusion or module import is needed
+to make it available.)
 </p>
+	
 <p>
-For example:
+This function could be used as follows:
 </p>
 <pre><tt>
     constexpr double power(double b, int x) {
-      if (std::in_constexpr_call() && x >= 0) {
-        // A constant-evaluation context.
+      if (std::is_constexpr_evaluated() && x >= 0) {
+        // A constant-evaluation context: Use a
+	// constexpr-friendly algorithm.
         double r = 1.0, p = b;
         unsigned u = (unsigned)x;
         while (u != 0) {
@@ -89,57 +87,97 @@ evaluation to complete as a constant-expression.
 <p>
 Call (2) isn't a constant-expression because <tt>n</tt> cannot be
 converted to an rvalue in a constant-expression context. So it will
-be evaluated in a context where <tt>std::in_constexpr_call()</tt>
+be evaluated in a context where <tt>std::is_constexpr_evaluated()</tt>
 is <tt>false</tt>; this is known at translation time, and the
 run-time code generated for the function can therefore easily be
 reduced to the equivalent of just
-</p>
 <pre><tt>
     inline double power'(double b, int x) {
       return std::pow(b, (double)x);
     }
 </pre></tt>
-
-<p>
-Call (3) could go either way. The call is technically a
-constant-expression, but it need not be evaluated as one (it's not
-called in a context requiring a constant).  The expectation is that
-if the implementation attempts to evaluate the call at compile time,
-<tt>std::in_constexpr_call()</tt> will produce <tt>true</tt> and
-otherwise it will produce <tt>false</tt> (that also falls out of the
-most likely implementation strategies).
 </p>
 <p>
-While a call to <tt>std::in_constexpr_call()</tt> is a core
-constant expression, it is not a constant expression.  For example,
-the following is invalid:
-</p>
+Call (3) is a core constant expression, but an implementation is
+not required to evaluate it at compile time.  We therefore specify
+that it causes <tt>std::is_constexpr_evaluated()</tt> to produce
+<tt>false</tt>.  It's tempting to leave it unspecified whether
+<tt>true</tt> or <tt>false</tt> is produced in that case, but that
+raises significant semantic concerns: The answer could then
+become inconsistent across various stages of the compilation.
+For example:
 <pre><tt>
-    constexpr void f() {
-      if constexpr (std::in_constexpr_call()) {  // Error!
-        // ...
-      }
-    }
-</pre></tt>
+  int *p, *invalid;
+  constexpr bool is_valid() {
+    return std::is_constexpr_evaluated() ? true : p != invalid;
+  }
+  constexpr int get() { return is_valid() ? *p : abort(); }
+</pre></tt>	
+This example tries to count on the fact that constexpr evaluation
+detects undefined behavior to avoid the non-constexpr-friendly
+call to <tt>abort()</tt> at compile time.  However, if
+<tt>std::is_constexpr_evaluated()</tt> can return <tt>true</tt>, we
+now end up with a situation where an important run-time check is
+by-passed.
+</p>
 
 <h4>Notes</h4>
 <p>
-The proposed function tests whether a currently evaluated function
-call is being evaluated at compile time.  Originally, we considered
-a slightly more general function that returned whether a currently
-evaluated <i>expression</i> (as opposed to <i>function call</i>) is
-being evaluated at compile time.  It turns out that such a query is
-ambiguous for certain C++ implementations (like Clang's) that
-handle constant expressions by just "tagging" them as opposed to
-"folding" them.  For example:
+Ideally, we'd like this function to return <tt>true</tt> when it is evaluated at
+compile time, and <tt>false</tt> otherwise.  However, the standard doesn't actually
+make a distinction between "compile time" and "run time", and hence a more careful
+specification is needed, one that fits the standard framework of "constant
+expressions".
 </p>
-<pre><tt>
-    static_assert(std::in_constexpr_call());  // Error!
-</pre></tt>
-
 <p>
-As the introductory example shows, <tt>std::in_constexpr_call()</tt> is
-useful to enable alternative implementations of functions for
+Our approach is to precisely identify a set of expressions that are "required to
+be constant-evaluated" (a new technical phrase) and specify that our new function
+returns <tt>true</tt> during the evaluation of such expressions and <tt>false</tt>
+otherwise.
+</p>
+<p>
+Specifically, we include two kinds of expressions in our set of expressions
+"required to be constant-evaluated".  The first kind is straightforward:
+Expressions in contexts where the standard already requires a constant result,
+such as the dimension of an array or the initializer of a constexpr variable.
+</p>
+<p>
+The second kind is a little more subtle: Expressions appearing in the initializers
+of variables that are not constexpr, but whose "constant-ness" has a significant
+semantic effect.
+Consider the following example:
+<pre><tt>
+  template<int> struct X {};
+  constexpr auto f() {
+    int const N = std::is_constexpr_evaluated() ? 13 : 17;
+    X<N> x1;
+    X<std::is_constexpr_evaluated() ? 13 : 17> x2;
+</pre></tt>
+We want to ensure that <tt>x1</tt> and <tt>x2</tt> have the same type.  However,
+the initializer of <tt>N</tt>, in itself, it not required to have a constant
+value.  It's only when we use <tt>N</tt> as a template argument later on that
+the requirement of a constant value arises, but by then a compiler already has
+committed its decision regarding the result of <tt>std::is_constexpr_evaluated()</tt>.
+In contrast, the second evaluation of <tt>std::is_constexpr_evaluated()</tt> falls
+squarely in the first kind of expressions "required to be constant-evaluated".
+</p>
+<p>
+Our approach for the second kind, then, is to specify that the initializer for a
+variable whose "constant-ness" matters for the semantics of the program is also
+"required to beconstant-evaluated" if evaluating it with
+<tt>std::is_constexpr_evaluated() == true</tt> would produce a constant.
+(The variables for which "constant-ness" matters are those of reference type or 
+non-volatile const integral type because they can be used to form constant values,
+as well as those of non-automatic storage duration because the "constant-ness" of
+their initializers can affect initialization timing.)
+This implies that compilers have to perform a "tentative constant evaluation" for
+the initializers of such variables.  Fortunately, that is already what current
+implementations do.
+</p>
+	
+<p>
+As the introductory example shows, <tt>std::is_constexpr_evaluated()</tt>
+is useful to enable alternative implementations of functions for
 compile time when the corresponding implementation for run time 
 would not comply to the constraints of core constant expressions.
 A forthcoming important special case of this principle is
@@ -183,7 +221,7 @@ recorded at the time:
 	<li><p>The following function is predefined in every translation unit:
 		<pre><tt>
 	namespace std {
-	  constexpr bool in_constexpr_call() noexcept {
+	  constexpr bool is_constexpr_evaluated() noexcept {
 	    ...
 	  }
 	}
