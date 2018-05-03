@@ -195,10 +195,11 @@ The syntax under consideration at that time was <tt>do constexpr</tt> instead of
 	function or function template.</ins>	A function or static data member declared with the <tt>constexpr</tt>
 	<ins>or	<tt>constexpr!</tt> </ins>specifier is implicitly an inline function or variable (10.1.6). If any
 	declaration of a function or function template has a <tt>constexpr</tt> <ins> or
-	<tt>constexpr!</tt> </ins>specifier, then all its declarations shall contain <del>the constexpr</del>
-	<ins>that same</ins> specifier. [ Note: An explicit specialization can differ from the template
-	declaration with respect to the <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier.
-	— end note ] [ Note: Function parameters cannot be declared <tt>constexpr</tt>. — end note ]
+	<tt>constexpr!</tt> </ins>specifier, then all its declarations shall contain
+	<del>the constexpr</del><ins>that same</ins> specifier. [ <i>Note:</i> An explicit specialization can differ
+	from the template declaration with respect to the <tt>constexpr</tt>
+	<ins>or <tt>constexpr!</tt> </ins>specifier. <i>&mdash; end note</i> ]
+	[<i>Note:</i> Function parameters cannot be declared <tt>constexpr</tt>. <i>&mdash; end note</i> ]
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 2 as follows:
@@ -248,7 +249,7 @@ The syntax under consideration at that time was <tt>do constexpr</tt> instead of
 <i>needed for constant evaluation</i> in [expr.const] paragraph 8:</p>
 <blockquote style="padding-left: 30px;">
 	&mdash; a constexpr function ...<br/>
-	<ins>&mdash; an immediate function that is named by an expression (_basic.def.odr_)</ins><br/>
+	<ins>&mdash; an immediate function that is named by an expression (_basic.def.odr_), or</ins><br/>
 	&mdash; a variable ...<br/>
 </blockquote>
 and add an example at the end of the paragraph:
