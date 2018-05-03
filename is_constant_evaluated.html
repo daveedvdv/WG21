@@ -161,7 +161,7 @@ squarely in the first kind of expressions "required to be constant-evaluated".
 <p>
 Our approach for the second kind, then, is to specify that the initializer for a
 variable whose "constant-ness" matters for the semantics of the program is also
-"required to beconstant-evaluated" if evaluating it with
+"required to be constant-evaluated" if evaluating it with
 <tt>std::is_constant_evaluated() == true</tt> would produce a constant.
 (The variables for which "constant-ness" matters are those of reference type or 
 non-volatile const integral type because they can be used to form constant values,
@@ -170,6 +170,37 @@ their initializers can affect initialization timing.)
 This implies that compilers have to perform a "tentative constant evaluation" for
 the initializers of such variables.  Fortunately, that is already what current
 implementations do.
+</p>
+<p>
+It is worth noting that despite the precise specification proposed here, this
+feature has potential sharp edges.  Consider the following example:
+<pre><tt>
+    constexpr int f() {
+      const int n = std::is_constant_evaluated() ? 13 : 17; // n == 13
+      int m = std::is_constant_evaluated() ? 13 : 17; // m might be 13 or 17 (see below)
+      char arr[n] = {}; // char[13]
+      return m + sizeof(arr);
+    }
+    int p = f(); // m == 13; initialized to 26
+    int q = p + f(); // m == 17 for this call; initialized to 56
+</tt></pre>
+The initializer of <tt>p</tt> (which has static storage duration and therefore
+is "required to be constant-evaluated") does produce a constant value with
+<tt>std::is_constant_evaluated() == true</tt>, and thus that is the value used
+for the actual evaluation: This results in <tt>m</tt> being initialized to
+<tt>13</tt> during the call to <tt>f()</tt>.  In contrast, The initializer of
+<tt>q</tt> (also "required to be constant-evaluated") does <i>not</i> produce a
+constant value with <tt>std::is_constant_evaluated() == true</tt> because the
+use of <tt>p</tt> in the initializer is not a core constant expression.  Thus
+the tentative evaluation with <tt>std::is_constant_evaluated() == true</tt> is
+discarded and the actual evaluation finds
+<tt>std::is_constant_evaluated() == false</tt>: This time, <tt>m</tt> is
+initialized to <tt>17</tt> during the call to <tt>f()</tt>.  In other words,
+identical-looking expressions produce distinct results.  A reasonable coding
+guideline in this context is that any dependence on
+<tt>std::is_constant_evaluated()</tt> should not affect the result of the
+computation: The initialization of <tt>m</tt> in the above example is thus
+arguably poor practice.
 </p>
 
 <h4>Notes</h4>
@@ -225,7 +256,7 @@ recorded at the time:
 	}
 		</pre></tt>
 	</p></li>
-	<li><p><i>Remarks:</i>An expression <tt>e</tt> is <i>required to be constant evaluated</i> if:
+	<li><p><i>Remarks:</i>An expression <tt>e</tt> is <i>required to be constant-evaluated</i> if:
 	<ul>
 		<li>it is a constant-expression (_expr.const_), or</li>
 		<li>it is a converted constant expression (_expr.const_), or</li>
@@ -233,14 +264,34 @@ recorded at the time:
 		<li>it is the initializer of a variable of reference type or of non-volatile
 		const-qualified integral or enumeration type or of non-automatic storage duration,
 		and <tt>e</tt> would be a constant expression (_expr.const_) if it were required to
-		be constant evaluated.</li>
+		be constant-evaluated.</li>
 	</ul></p></li>
 	<li><p><i>Returns:</i> <tt>true</tt> if evaluation of the call occurs within the evaluation
-		of an expression that is required to be constant evaluated, <tt>false</tt> otherwise.
+		of an expression that is required to be constant-evaluated, <tt>false</tt> otherwise.
 	</p></li>
 	<li><p>Every invocation of <tt>std::is_constant_evaluated()</tt> is a core constant
 		expression.
 	</p></li>
+	<li><p>[ <i>Example:</i>
+<pre><tt>
+template&lt;int> struct X {}
+X&lt;std::is_constant_evaluated()> x; // type X&lt;true><tt>
+int y;
+int a = std::is_constant_evaluated() ? y : 1; // initializes a to 1
+int b = std::is_constant_evaluated() ? 2 : y; // initializes b to 2
+int c = y + std::is_constant_evaluated() ? 2 : y; // initializes c to 2*y
+
+constexpr int f() {
+  const int n = std::is_constant_evaluated() ? 13 : 17; // n == 13
+  int m = std::is_constant_evaluated() ? 13 : 17; // m might be 13 or 17 (see below)
+  char arr[n] = {}; // char[13]
+  return m + sizeof(arr);
+}
+int p = f(); // m == 13; initialized to 26
+int q = p + f(); // m == 17 for this call; initialized to 56
+
+</tt></pre>
+	&mdash; <i>end example ]</p></li>
 	</ol>
 </xins></blockquote>
 </body>
