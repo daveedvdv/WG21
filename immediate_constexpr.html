@@ -12,15 +12,15 @@
 </p>
 
 <p align=right>
+<br/>Richard Smith (richard@metafoo.co.uk)  
 <br/>Andrew Sutton (andrew.n.sutton@gmail.com)  
 <br/>Daveed Vandevoorde (daveed@edg.com)
 </p>
 
-<h1 align="center">constexpr!</h1>
+<h1 align="center">constexpr! functions</h1>
 
 <h3>Introduction and motivation</h3>
 
-<h4>Functions</h4>
 <p>
 The <tt>constexpr</tt> specifier applied to a function or member function
 indicates that a call to that function might be valid in a context requiring
@@ -119,11 +119,8 @@ void some_code() {
 <p>
 Given that <tt>constexpr!</tt> functions are a useful alternative to function-style
 macros, it is natural to wonder whether we could make <tt>constexpr!</tt>
-<i>variables</i> a useful alternative to non-function-style macros.  We answer in
-the affirmative by specifying that a <tt>constexpr!</tt> variable is always
-immediately converted to a prvalue when designated by an <i>id-expression</i>;
-we call such variables <i>immediate</i> variables.
-For example:
+<i>variables</i> a useful alternative to non-function-style macros.  We'd call such
+variables &mdash; which would never be seen by a back end &mdash; <i>immediate</i> variables:
 <pre><code class="language-c++">constexpr! int RN = 42;
 int LN = 42;
 
@@ -133,9 +130,11 @@ int r1 = f(LN);  // Direct reference binding.
 int r2 = f(RN);  // Not a direct binding (temporary created).
 </code></pre>
 </p>
-
 <p>
-As with immediate functions, an immediate variable need never be seen by a back end.
+Unfortunately, the exact specification of such a facility raises some difficult
+questions, some of which relate to the topic of enabling class types for nontype
+template parameters as proposed in <a href="https://wg21.link/p0732r1">P0732R1</a>.
+This paper therefore does not pursue that extension at this time.
 </p>
 
 <h4>Notes</h4>
@@ -161,8 +160,8 @@ of the discussion of P0595r0.  At the time, the following poll was recorded:
 	functions], ignoring syntax):<br/>
 	SF: 8 | F: 13 | N: 2 | A: 0 | SA: 0
 </blockquote>
-(see http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0 ; the syntax under consideration
-at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
+(See <a href="http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0">http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0</a>.
+The syntax under consideration at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>.)
 </p>
 
 
@@ -230,34 +229,67 @@ at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>).
 
 <p>Add a paragraph after paragraph 2 of [expr.prim.id]:</p>
 <blockquote style="padding-left: 30px;"><xins>
-	An <i>id-expression</i> that denotes an immediate variable ([dcl.constexpr]) is immediately
-	converted to a prvalue ([conv.lval]).  An <i>id-expression</i> that denotes an immediate
-	function ([dcl.constexpr]) and is not the right hand expression of a class member access
-	operation ([expr.ref]) can be used only as the (possibly parenthesized)
-	<i>postfix-expression</i> of a function call ([expr.call]).
+	An <i>id-expression</i> that denotes an immediate variable (_dcl.constexpr_) is immediately
+	converted to a prvalue (_conv.lval_).  An <i>id-expression</i> that denotes an immediate
+	function (_dcl.constexpr_) and is not the right hand expression of a class member access
+	operation (_expr.ref_) can be used only as the (possibly parenthesized)
+	<i>postfix-expression</i> of a function call (_expr.call_).
 </xins></blockquote>
 
 <p>Add a paragraph at the end of [expr.call]:</p>
 <blockquote style="padding-left: 30px;"><xins>
-	A call to an immediate function ([dcl.constexpr]) that does not lexically appear in the
-	<i>function-body</i> ([dcl.fct.def.general]) of an immediate function shall be a constant
-	expression ([expr.const]).
+	A call to an immediate function (_dcl.constexpr_) that does not lexically appear in the
+	<i>function-body</i> (_dcl.fct.def.general_) of an immediate function shall be a constant
+	expression (_expr.const_).
 </xins></blockquote>
 
 <p>In bullet (4.3.2) of [expr.ref] paragraph 4, strike</p>
 <blockquote style="padding-left: 30px;">
 	<del>The expression can be used only as the left-hand operand of a member function call
-	(12.2.1). [Note: Any redundant set of parentheses surrounding the expression is ignored
-	(8.4). — end note ]</del>
+	(12.2.1). [ <i>Note:</i> Any redundant set of parentheses surrounding the expression is
+	ignored	(8.4). <i>&mdash; end note</i> ]</del>
 </blockquote>
 <p>and add to the end of bullet (4.3) of that same paragraph (after the two sub-bullets):</p>
 <blockquote style="padding-left: 30px;">
-	<ins>If <tt>E1.E2</tt> refers to a nonstatic member function ([class.mfct.non-static]) or
-	to an immediate function ([dcl.constexpr]) the expression can be used only as the left-hand
-	operand of a member function call (12.2.1). [Note: Any redundant set of parentheses
-	surrounding the expression is ignored (8.4). — end note ]</ins>
+	<ins>If <tt>E1.E2</tt> refers to a nonstatic member function (_class.mfct.non-static_) or
+	to an immediate function (_dcl.constexpr_) the expression can be used only as the left-hand
+	operand of a member function call (12.2.1). [ <i>Note:</i> Any redundant set of parentheses
+	surrounding the expression is ignored (8.4). <i>&mdash; end note</i> ]</ins>
 </blockquote>
-		
+
+<p>Insert a bullet after the first bullet (8.6) of the definition of
+<i>needed for constant evaluation</i> in [expr.const] paragraph 8:</p>
+<blockquote style="padding-left: 30px;">
+	&mdash; a constexpr function ...<br/>
+	<ins>&mdash; an immediate function that is named by an expression (_basic.def.odr_)</ins><br/>
+	&mdash; a variable ...<br/>
+</blockquote>
+and add an example at the end of the paragraph:
+<blockquote style="padding-left: 30px;">
+	[ <i>Example:</i>
+	<pre><tt>
+  struct N {
+    N(N const&) = delete;
+  };
+  template&lt;typename T&gt; constexpr void bad_assert_copyable() { T t; T t2 = t; }
+  using ineffective = decltype(bad_assert_copyable<N>());
+    // bad_assert_copyable<N> is not needed for constant evaluation
+    // (and thus not instantiated)
+  template&lt;typename T&gt; constexpr! void assert_copyable() { T t; T t2 = t; }
+  using check = decltype(assert_copyable<N>());
+    // error: assert_copyable<N> is instantiated (because it is needed for constant
+    // evaluation), but the attempt to copy t is ill-formed
+	</tt></pre>
+	<i>&mdash; end example</i> ]
+</blockquote>
+
+<p>Update [dcl.fct.def.default] paragraph 3 as follows:
+<blockquote style="padding-left: 30px;">
+FIXME An explicitly-defaulted function that is not defined as deleted may be declared
+<tt>constexpr</tt><ins> or <tt>constexpr!</tt></ins> only if it would have been implicitly
+declared as <tt>constexpr</tt>. [...]
+</blockquote>
+
 <p>Update [temp.explicit] paragraph 1 as follows:
 <blockquote style="padding-left: 30px;">
 	[...]An explicit instantiation of a function template, member function of a class template,
