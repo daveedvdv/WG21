@@ -99,7 +99,8 @@ where it is defined.
 </p>
 <p>
 Immediate (i.e., <tt>constexpr!</tt>) functions, however, create a clean separation
-between the compilation process and the constexpr evaluation process (see also P0992).
+between the compilation process and the constexpr evaluation process (see also 
+<a href="http://wg21.link/p0992r0">P0992</a>).
 Thus, we can make <tt>source_location::current()</tt> an immediate function, and wrap
 it as needed in other immediate functions: The value produced will correspond to the
 source location of the "root" immediate function call.  For example:
