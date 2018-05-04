@@ -260,7 +260,8 @@ recorded at the time:
 		<li>it is a <i>constant-expression</i> (_expr.const_), or</li>
 		<li>it is the <i>condition</i> of a <i>constexpr if</i> statement (_stmt.if_), or</li>
 		<li>it is the initializer of a constexpr variable (_dcl.constexpr_), or</li>
-		<li>it is a <i>constraint-expression</i> (_temp.constr.decl_), or</li>
+		<li>it is a <i>constraint-expression</i> (_temp.constr.decl_) (possibly one formed from
+			the <i>constraint-logical-or-expression</i> of a <i>requires-clause</i>), or</li>
 		<li>it is the initializer of a variable of reference type or of non-volatile
 		const-qualified integral or enumeration type or of non-automatic storage duration,
 		and <tt>e</tt> would be a constant expression (_expr.const_) if it were required to
