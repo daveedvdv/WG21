@@ -153,37 +153,6 @@ have been identified at the moment.</p>
 destructor,
 </blockquote>
  
-<p>Change in [basic.start.term] paragraph 1:</p>  
-
-<blockquote>Destructors (15.4) for initialized objects (that is, objects whose
-lifetime (6.8) has begun) with static storage duration <ins>that
-do not have constant destruction</ins>, and functions
-registered with <code>std::atexit</code>, are called as part of a call
-to <code>std::exit</code> (21.5)</blockquote>
-
-
-<p>Change in [basic.start.term] paragraph 3:</p>
-
-<blockquote>If the completion of the constructor or dynamic initialization of
-an object with static storage duration strongly happens before that of
-another, the completion of the destructor of the second is sequenced
-before the initiation of the destructor of the first<ins> if neither of
-those objects have constant destruction</ins>.</blockquote>
-
-
-<p>Change in [basic.start.term] paragraph 5:</p>
-
-<blockquote>If the completion of the initialization of an object with static
-storage duration strongly happens before a call to <code>std::atexit</code>
-(see <code>&lt;cstdlib&gt;</code>, 21.5), the call to the function passed to
-<code>std::atexit</code> is sequenced before the call to the destructor for the
-object<ins> if the object does not have constant destruction</ins>.
-If a call to <code>std::atexit</code> strongly happens before the completion of
-the initialization of an object with static storage duration, the call to the
-destructor for the object is sequenced before the call to the function passed
-to <code>std::atexit</code> <ins> if the object does not have constant
-destruction</ins>.
-</blockquote>
 
 <p>Change in [expr.const] paragraph 2:</p>
 
@@ -328,15 +297,6 @@ destruction.</ins>
 <blockquote>Each decl-specifier of the decl-specifier-seq of a destructor
 declaration (if any) shall be <code>friend</code>, <code>inline</code>,
 <del> or</del> <code>virtual</code><ins>, or <code>constexpr</code></ins>.
-</blockquote>
-
-<p>Change in [class.dtor]  paragraph 12:</p>
-
-<blockquote>A destructor is invoked implicitly</blockquote>
-
-<blockquote style="padding-left: 30px;">— for a constructed object
-with static storage duration<ins> that does not have constant
-destruction</ins> (6.7.1) at program termination (6.6.4)
 </blockquote>
 
 <p>Add after [class.dtor] paragraph 9:</p>
