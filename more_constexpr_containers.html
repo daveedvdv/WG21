@@ -3,26 +3,28 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html">
 <style type="text/css">
-  ins { text-decoration:none; font-weight:bold; background-color:#A0FFA0 }
+  ins { text-decoration:none; background-color:#A0FFA0 }
   del { text-decoration:line-through; background-color:#FFA0A0 }
   xins { font-weight: inherit; color: #2020ff }
 
   tab { padding-left: 4em; }
   tab2 { padding-left: 2em; }
+   ul.dashed { list-style: none;  margin-left: 0; padding-left: 1.5em; text-indent: -1.5em; }
+   ul.dashed li:before { content: "\2014\a0" }
 </style>
 <title>More constexpr containers</title>
 </head>
 
 
 <body>
-<p align="right"><b>P0784R3, 2018-05-04</b>
-<br>EWG, LEWG
+<p align="right"><b>D0784R5, 2018-06-29</b>
+<br>CWG, LWG
 </p>
 
 <p align="right">
 <br>Louis Dionne (ldionne.2@gmail.com)  
-<br>Richard Smith (richard@metafoo.co.uk)  
 <br>Nina Ranns (dinka.ranns@gmail.com)
+<br>Richard Smith (richard@metafoo.co.uk)  
 <br>Daveed Vandevoorde (daveed@edg.com)
 </p>
 
@@ -34,7 +36,8 @@
 <br>R1: Provided initial wording.
 <br><tab2>EWG approved the proposal as presented: SF: 23 | F: 11 | N: 0 | A: 0 | SA: 0
 <br>R2: Implemented core review comments.
-<br>R3 (this version): Extends proposal for non-transient allocations.
+<br>R3: Extends proposal for non-transient allocations.
+<br>R4 (this revision): Tighten wording for "construct" and "destruct"
 </p>
 
 <h3>Introduction and motivation</h3>
@@ -148,7 +151,7 @@ have been identified at the moment.</p>
 </i></p>
 
 <p>Change in [basic.types] paragraph 10.5.1:</p>
-<blockquote style="padding-left: 30px;">-it has a 
+<blockquote style="padding-left: 30px;">&mdash; it has a 
 <del>trivial</del><ins>constexpr</ins> 
 destructor,
 </blockquote>
@@ -160,25 +163,25 @@ destructor,
 unless the evaluation of <code>e</code>, following the rules of the abstract
 machine (4.6), would evaluate one of the following expressions:</blockquote>
 
-<blockquote style="padding-left: 30px;"> — <code>this</code> (8.1.2),
+<blockquote style="padding-left: 30px;"> &mdash; <code>this</code> (8.1.2),
 except in a constexpr function<del> or</del><ins>,</ins> a constexpr
 constructor,<ins> or a constexpr destructor</ins> that is being
 evaluated as part of e;
 </blockquote>
 
-<blockquote style="padding-left: 30px;"> — an invocation of a function
+<blockquote style="padding-left: 30px;"> &mdash; an invocation of a function
 other than a constexpr constructor <ins>or destructor </ins>for a
 literal class,<ins>or </ins> a constexpr function <del>, or an implicit
 invocation of a trivial destructor (15.4)</del> [ <i>Note:</i>
 Overload resolution (16.3) is applied as usual — <i>end note</i> ];
 </blockquote>
 
-<blockquote style="padding-left: 30px;"> — an invocation of an
+<blockquote style="padding-left: 30px;"> &mdash; an invocation of an
 undefined constexpr function<del> or</del><ins>,</ins> an undefined
 constexpr constructor,<ins> or an undefined constexpr destructor</ins>;
 </blockquote>
 
-<blockquote style="padding-left: 30px;"> — an invocation of an
+<blockquote style="padding-left: 30px;"> &mdash; an invocation of an
 instantiated constexpr function<del> or</del><ins>,</ins> a constexpr
 constructor,<ins> or a constexpr destructor</ins> that fails to satisfy the
 requirements for a constexpr function<del> or</del><ins>,</ins> a constexpr
@@ -186,36 +189,36 @@ constructor,<ins> or a constexpr destructor</ins> (10.1.5);
 </blockquote>
 
 
-<blockquote style="padding-left: 30px;"> —  an <i>id-expression</i>
+<blockquote style="padding-left: 30px;"> &mdash;  an <i>id-expression</i>
 that refers to a variable or data member of reference type unless the
 reference has a preceding initialization and either
 </blockquote>
 
-<blockquote style="padding-left: 60px;"> — it is initialized with a
+<blockquote style="padding-left: 60px;"> &mdash; it is initialized with a
 constant expression<ins>,</ins><del> or</del>
 </blockquote>
 
-<blockquote style="padding-left: 60px;"> — its lifetime began within
+<blockquote style="padding-left: 60px;"> &mdash; its lifetime began within
 the evaluation of <code>e</code><ins>, or</ins><del>;</del>
 </blockquote>
 
-<blockquote style="padding-left: 60px;"><ins> — for an
+<blockquote style="padding-left: 60px;"><ins> &mdash; for an
 <i>id-expression</i> that refers to a data member of a constexpr variable <code>x</code>
 with static storage duration, the evaluation occurs during the
 invocation of a constexpr destructor for <code>x</code>. </ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"> — modification of an object
+<blockquote style="padding-left: 30px;"> &mdash; modification of an object
 (8.18, 8.2.6, 8.3.2) unless it is applied to a non-volatile lvalue of literal
 type that refers to <del> non-volatile object whose lifetime began within the
 evaluation of <code>e</code></del>
 </blockquote>
 
-<blockquote style="padding-left: 60px;"><ins> — a non-volatile object
+<blockquote style="padding-left: 60px;"><ins> &mdash; a non-volatile object
 whose lifetime began within the evaluation of <code>e</code>, or </ins>
 </blockquote>
 
-<blockquote style="padding-left: 60px;"><ins> — a non-volatile
+<blockquote style="padding-left: 60px;"><ins> &mdash; a non-volatile
 subobject of a constexpr variable <code>x</code> with static storage duration
 and the modification occurs in an invocation of a
 constexpr destructor for <code>x</code></ins>
@@ -226,8 +229,8 @@ constexpr destructor for <code>x</code></ins>
 
 
 <blockquote><ins>An object is said to have <i>constant destruction</i> if: </ins></blockquote>
-<blockquote style="padding-left: 30px;"><ins> — it is of a non-class type, or</ins></blockquote>
-<blockquote style="padding-left: 30px;"><ins> — the type of that object has a constexpr destructor and for a hypothetical expression
+<blockquote style="padding-left: 30px;"><ins> &mdash; it is of a non-class type, or</ins></blockquote>
+<blockquote style="padding-left: 30px;"><ins> &mdash; the type of that object has a constexpr destructor and for a hypothetical expression
 <code>e</code> whose only effect is to destroy that object,
 <code>e</code> is a core constant expression.</ins>
 </blockquote>
@@ -251,12 +254,12 @@ declaration declares that destructor to be a
 <blockquote><ins>The definition of a <code>constexpr</code> destructor
 shall satisfy the following requirements:</ins>
 </blockquote>
-<blockquote style="padding-left: 30px;"><ins>— it shall not be virtual</ins></blockquote>
-<blockquote style="padding-left: 30px;"><ins>— the class shall not
+<blockquote style="padding-left: 30px;"><ins>&mdash; it shall not be virtual</ins></blockquote>
+<blockquote style="padding-left: 30px;"><ins>&mdash; the class shall not
 have any virtual base classes;</ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— its
+<blockquote style="padding-left: 30px;"><ins>&mdash; its
 <i>function-body</i> shall satisfy the requirements for a
 <i>function-body</i> of a constexpr function;</ins>
 </blockquote>
@@ -305,11 +308,11 @@ declaration (if any) shall be <code>friend</code>, <code>inline</code>,
 <ins> The defaulted destructor is a constexpr destructor if </ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— it is a trivial
+<blockquote style="padding-left: 30px;"><ins>&mdash; it is a trivial
 destructor, or </ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— it is not virtual
+<blockquote style="padding-left: 30px;"><ins>&mdash; it is not virtual
 and all the destructors it invokes are constexpr destructors</ins>
 </blockquote>
 
@@ -334,32 +337,32 @@ new-expression <code>e1</code> to provide storage for a
 <i>new-expression</i> <code>e2</code> if the following would
 be true were the allocation not extended:</del></blockquote>	
 
-<blockquote style="padding-left: 30px;"><del>— the evaluation of
+<blockquote style="padding-left: 30px;"><del>&mdash; the evaluation of
 <code>e1</code> is sequenced before the evaluation of <code>e2</code>,
 and</del>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><del>— <code>e2</code> is
+<blockquote style="padding-left: 30px;"><del>&mdash; <code>e2</code> is
 evaluated whenever <code>e1</code> obtains storage, and</del>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><del>— both <code>e1</code>
+<blockquote style="padding-left: 30px;"><del>&mdash; both <code>e1</code>
 and <code>e2</code> invoke the same replaceable global allocation function,
 and</del>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><del>— if the allocation
+<blockquote style="padding-left: 30px;"><del>&mdash; if the allocation
 function invoked by <code>e1</code> and <code>e2</code> is throwing,
 any exceptions thrown in the evaluation of either <code>e1</code> or
 <code>e2</code> would be first caught in the same handler, and</del>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><del>— the pointer values
+<blockquote style="padding-left: 30px;"><del>&mdash; the pointer values
 produced by <code>e1</code> and <code>e2</code> are operands to
 evaluated delete-expressions, and</del>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><del>— the evaluation
+<blockquote style="padding-left: 30px;"><del>&mdash; the evaluation
 of <code>e2</code> is sequenced before the evaluation of the
 delete-expression whose operand is the pointer value produced by
 <code>e1</code>.</del></blockquote>
@@ -368,7 +371,7 @@ delete-expression whose operand is the pointer value produced by
 
 <blockquote><del>...</del></blockquote>
 
-<blockquote><del>— <i>end example</i> ]</del></blockquote>
+<blockquote><del>&mdash; <i>end example</i> ]</del></blockquote>
 
 <p>Add new paragraph after [expr.new] paragraph 10</p>
 
@@ -388,32 +391,32 @@ storage for a <i>new-expression.</i> <code>e2</code> if the following
 would be true were the allocation not extended:</ins>
 </blockquote>	
 
-<blockquote style="padding-left: 30px;"><ins>— the evaluation
+<blockquote style="padding-left: 30px;"><ins>&mdash; the evaluation
 of <code>e1</code> is sequenced before the evaluation of
 <code>e2</code>, and</ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— <code>e2</code>
+<blockquote style="padding-left: 30px;"><ins>&mdash; <code>e2</code>
 is evaluated whenever <code>e1</code> obtains storage, and</ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— both
+<blockquote style="padding-left: 30px;"><ins>&mdash; both
 <code>e1</code> and <code>e2</code> invoke the same replaceable
 global allocation function, and</ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— if the allocation
+<blockquote style="padding-left: 30px;"><ins>&mdash; if the allocation
 function invoked by <code>e1</code> and <code>e2</code> is throwing,
 any exceptions thrown in the evaluation of either <code>e1</code> or
 <code>e2</code> would be first caught in the same handler, and</ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— the pointer
+<blockquote style="padding-left: 30px;"><ins>&mdash; the pointer
 values produced by <code>e1</code> and <code>e2</code> are operands
 to evaluated <i>delete-expression</i>s, and</ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>— the evaluation
+<blockquote style="padding-left: 30px;"><ins>&mdash; the evaluation
 of <code>e2</code> is sequenced before the evaluation of the
 <i>delete-expression</i> whose operand is the pointer value produced by
 <code>e1</code>.</ins>
@@ -423,12 +426,12 @@ of <code>e2</code> is sequenced before the evaluation of the
 
 <blockquote><ins>...</ins></blockquote>
 
-<blockquote><ins>— <i>end example</i> ]</ins></blockquote>
+<blockquote><ins>&mdash; <i>end example</i> ]</ins></blockquote>
 
 
 <p>Change in [expr.const] paragraph 2:</p>
 
-<blockquote><del>— a <i>new-expression (8.3.4)</i>;</del>
+<blockquote><del>&mdash; a <i>new-expression (8.3.4)</i>;</del>
 </blockquote>  
 
 <!--
@@ -438,12 +441,12 @@ function (21.6.2.1, 21.6.2.2), or a <i>placement
 new-expression</i> (8.3.4);</ins>
 </blockquote>    
 -->
-<blockquote>— <ins>a <i>new-expression</i> (8.3.4),
+<blockquote>&mdash; <ins>a <i>new-expression</i> (8.3.4),
 unless the selected allocation function is a replaceable global allocation
 function (21.6.2.1, 21.6.2.2);</ins>
 </blockquote>    
 
-<blockquote><del>— a <i>delete-expression (8.3.5)</i>;</del>
+<blockquote><del>&mdash; a <i>delete-expression (8.3.5)</i>;</del>
 </blockquote>   
 
 	
@@ -455,7 +458,6 @@ function (21.6.2.1, 21.6.2.2);</ins>
 
 <p>Add a new paragraph after [expr.const] paragraph 2:</p>
 
-<ins>
 <blockquote><ins>
 For the purposes of determining whether an expression is a core constant
 expression, the evaluation of a call to a member function of
@@ -466,17 +468,22 @@ otherwise fail the requirements for a core constant expression.
 Similarly, the evaluation of a call to a member function of
 <tt>std::allocator_traits&lt;std::allocator&lt;T&gt;&gt;</tt> as defined in
 _allocator.traits,members_, is a valid core constant expression unless
-</ins></blockquote>
 
-<blockquote><ins>— for a call to the member <tt>construct</tt>,
+<blockquote>
+	<ul class="dashed">
+	<li><ins>for a call to the member <tt>construct</tt>,
+	the second argument, of type T*, does not point to storage
+	allocated with <tt>std::allocator&lt;T&gt;</tt> or
 	the evaluation of the underlying constructor call is
-	not a core constant expression, or</ins>
-</blockquote>   
+	not a core constant expression, or</ins></li>
 
-<blockquote><ins>— for a call to the member <tt>destroy</tt>,
+	<li><ins>for a call to the member <tt>destroy</tt>,
+	the second argument, of type T*, does not point to storage
+	allocated with <tt>std::allocator&lt;T&gt;</tt> or
 	the evaluation of the underlying destructor call is
-	not a core constant expression.</ins>
-</blockquote>   
+	not a core constant expression.</ins></li>
+</blockquote>
+</ins></blockquote>
 
 <p><i>
 	<b>Note 5: </b>The following changes enable non-transient
@@ -485,7 +492,7 @@ _allocator.traits,members_, is a valid core constant expression unless
 
 <p>Change bullet (6.2) of [expr.const] paragraph 6 from:
 <blockquote>
-	<ul>
+	<ul class="dashed">
 	<li> if the value is of pointer type, it contains the address of an
 	     object with static storage duration, the address past the
 	     end of such an object (8.5.6), the address of a function,
@@ -494,9 +501,9 @@ _allocator.traits,members_, is a valid core constant expression unless
 </blockquote>
 to:
 <blockquote>
-	<ul>
+	<ul class="dashed">
 	<li> if the value is of pointer type, it contains
-		<ul>
+		<ul class="dashed">
 		<li>the address of an object with static storage duration or 
 		    the address past the end such an object (8.5.6), or</li>
 		<li>the address of a function, or</li>
@@ -522,13 +529,5 @@ to:
 </<blockquote>
 </p>
 	
-<!--
-<p>Add to end of [expr.const] paragraph 6:</p>
-
-<blockquote><ins>Every object of dynamic storage duration [6.6.4.4]
-created during the evaluation of a constant expression shall be
-destroyed during that evaluation and its storage shall be deallocated.</ins>
-</blockquote>
--->
 
 </ins></body></html>
