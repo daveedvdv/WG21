@@ -7,8 +7,8 @@
   tab { padding-left: 4em }
 </style>
 <body>
-<p align=right><b>P1073R0, 2018-05-04</b>
-<br/>EWG
+<p align=right><b>P1073R2, 2018-07-11</b>
+<br/>CWG
 </p>
 
 <p align=right>
@@ -18,6 +18,18 @@
 </p>
 
 <h1 align="center">constexpr! functions</h1>
+
+<h4>Revisions</h4>
+<p>
+Revision 0: Original proposal with wording.
+</p>
+<p>
+Revision 1: Introduce <tt>constexpr!</tt> token and allow it in lambda
+            expressions.
+</p>
+<p>
+Revision 2: Minor typo/example fix.
+</p>
 
 <h3>Introduction and motivation</h3>
 
@@ -165,8 +177,38 @@ of the discussion of P0595r0.  At the time, the following poll was recorded:
 The syntax under consideration at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>.)
 </p>
 
+<h4>Acknowledgments</h4>
+
+Thanks to Vitorrio Romeo for catching a missing wording change.
+
 
 <h2>Wording changes</h2>
+
+<p>Add to the productions of [lex.pptoken]:</p>
+<blockquote style="padding-left: 30px;">
+	<i>preprocessing-token</i>:<br/>
+	<tab><i>header-name</i><br/>
+	<tab><ins><tt>constexpr!</tt></ins><br/>
+	<tab><i>identifier</i><br/>
+	<tab><i>pp-number</i><br/>
+	<tab><i>character-literal</i><br/>
+	<tab><i>user-defined-character-literal</i><br/>
+	<tab><i>string-literal</i><br/>
+	<tab><i>user-defined-string-literal</i><br/>
+	<tab><i>preprocessing-op-or-punc</i><br/>
+	<tab>each non-white-space character that cannot be one of the above<br/>
+</blockquote>
+
+<p>Change the first sentence of [lex.key] paragraph 1 as follows:</p>
+<blockquote style="padding-left: 30px;">
+	The <del>identifiers</del><ins>tokens</ins> shown in Table 5
+	<ins>(all <i>identifier</i>s, except for <tt>constexpr!</tt>)</ins>
+	are reserved for use as keywords (that is, they are unconditionally
+	treated as keywords in phase 7) except in an <i>attribute-token</i>
+	(10.6.1):
+</blockquote>
+<p>and add the keyword <tt>constexpr!</tt> to Table 5 ("Keywords")
+   in [lex.key].</p>
 
 <p>Add to the grammar of [dcl.spec] paragraph 1:</p>  
 <blockquote style="padding-left: 30px;">
@@ -181,14 +223,23 @@ The syntax under consideration at that time was <tt>do constexpr</tt> instead of
 	<tab><tt>inline</tt>
 </blockquote>
 
+<p>Update [expr.prim.lambda] paragraph 3 as follows:</p>
+<blockquote style="padding-left: 30px;">
+	In the <i>decl-specifier-seq</i> of the <i>lambda-declarator</i>,
+	each <i>decl-specifier</i> shall <del>either</del> be
+	<ins>one of</ins> <tt>mutable</tt><ins>, </ins><del> or</del>
+	<tt>constexpr</tt><ins>, or <tt>constexpr!</tt></ins>.
+	[ <i>Note:</i> The trailing <i>requires-clause</i> is described
+	  in Clause 11. <i>&mdash; end note</i> ]
+</blockquote>
+
 <p>Append to [dcl.spec] paragraph 2:</p>  
 <blockquote style="padding-left: 30px;">
 	<ins>The <tt>constexpr</tt> and <tt>constexpr!</tt> shall not both appear in a
 	<i>decl-specifiers-seq</i>.</ins>
 </blockquote>
 
-<p>Update [dcl.constexpr] paragraph 1 as follows:
-
+<p>Update [dcl.constexpr] paragraph 1 as follows:</p>
 <blockquote style="padding-left: 30px;">
 	The <tt>constexpr</tt>specifier shall be applied only to the definition of a variable or
 	variable template or the declaration of a function or function template.
@@ -203,7 +254,7 @@ The syntax under consideration at that time was <tt>do constexpr</tt> instead of
 	[<i>Note:</i> Function parameters cannot be declared <tt>constexpr</tt>. <i>&mdash; end note</i> ]
 </blockquote>
 
-<p>Update [dcl.constexpr] paragraph 2 as follows:
+<p>Update [dcl.constexpr] paragraph 2 as follows:</p>
 <blockquote style="padding-left: 30px;">
 	A <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier used in the declaration of a function
 	that is not a constructor declares that function to be a <i>constexpr function</i>. Similarly, a
@@ -212,7 +263,7 @@ The syntax under consideration at that time was <tt>do constexpr</tt> instead of
 	with the <tt>constexpr!</tt> specifier is called an <i>immediate function</i>.</ins>
 </blockquote>
 
-<p>Update [dcl.constexpr] paragraph 8 as follows:
+<p>Update [dcl.constexpr] paragraph 8 as follows:</p>
 <blockquote style="padding-left: 30px;">
 	The <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier has no effect on the type of a
 	constexpr function or a constexpr constructor.
@@ -261,28 +312,46 @@ and add an example at the end of the paragraph:
     N(N const&) = delete;
   };
   template&lt;typename T&gt; constexpr void bad_assert_copyable() { T t; T t2 = t; }
-  using ineffective = decltype(bad_assert_copyable<N>());
-    // bad_assert_copyable<N> is not needed for constant evaluation
+  using ineffective = decltype(bad_assert_copyable&lt;N&gt;());
+    // bad_assert_copyable&lt;N&gt; is not needed for constant evaluation
     // (and thus not instantiated)
   template&lt;typename T&gt; constexpr! void assert_copyable() { T t; T t2 = t; }
-  using check = decltype(assert_copyable<N>());
-    // error: assert_copyable<N> is instantiated (because it is needed for constant
+  using check = decltype(assert_copyable&lt;N&gt;());
+    // error: assert_copyable&lt;N&gt; is instantiated (because it is needed for constant
     // evaluation), but the attempt to copy t is ill-formed
 	</tt></pre>
 	<i>&mdash; end example</i> ]
 </blockquote>
 
-<p>Update [dcl.fct.def.default] paragraph 3 as follows:
+<p>Update [dcl.fct.def.default] paragraph 3 as follows:</p>
 <blockquote style="padding-left: 30px;">
 An explicitly-defaulted function that is not defined as deleted may be declared
 <tt>constexpr</tt> <ins>or constexpr! </ins>only if it would have been implicitly
 declared as <tt>constexpr</tt>. [...]
 </blockquote>
 
-<p>Update [temp.explicit] paragraph 1 as follows:
+<p>Update [temp.explicit] paragraph 1 as follows:</p>
 <blockquote style="padding-left: 30px;">
 	[...]An explicit instantiation of a function template, member function of a class template,
 	or variable template shall not use the <tt>inline</tt><del> or</del><ins>,</ins>
 	<tt>constexpr</tt><ins>, or <tt>constexpr!</tt></ins> specifiers.
 </blockquote>
+
+
+<p>Add a paragraph to [diff.cpp17.lex] with the following content:</p>
+<blockquote style="padding-left: 30px;">
+	<b>Affected subclause:</b> 5.4 [lex.pptoken]</br>
+	<b>Change:</b> New <i>preprocessing-token</i></br>
+	<b>Rationale:</b> Required for new feature. The <tt>constexpr!</tt>
+	token is added to define immediate functions.  It is a
+	<i>preprocessing-token</i> to prevent it from being spelled as
+	<tt>constexpr not</tt>.</br>
+	<b>Effect on original feature:</b> Valid ISO C++ 2017 using adjacent
+	preprocessing tokens <tt>constexpr</tt> and <tt>!</tt> may not be
+	valid in this International Standard: <pre><tt>
+  #define M(x) x##constexpr!=0 // </tt><i>error: pasting </i><tt>X</tt><i> with </i><tt>constexpr!</tt><i> does not form a valid token</i><tt>
+  void f() { int Xconstexpr = 0; if (M(X)) {} }
+	</tt></pre>
+</blockquote>
+
 </body></html>
