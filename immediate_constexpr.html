@@ -7,7 +7,7 @@
   tab { padding-left: 4em }
 </style>
 <body>
-<p align=right><b>P1073R2, 2018-07-11</b>
+<p align=right><b>P1073R2, 2018-10-04</b>
 <br/>CWG
 </p>
 
@@ -17,7 +17,7 @@
 <br/>Daveed Vandevoorde (daveed@edg.com)
 </p>
 
-<h1 align="center">constexpr! functions</h1>
+<h1 align="center">Immediate functions</h1>
 
 <h4>Revisions</h4>
 <p>
@@ -28,7 +28,7 @@ Revision 1: Introduce <tt>constexpr!</tt> token and allow it in lambda
             expressions.
 </p>
 <p>
-Revision 2: Minor typo/example fix.
+Revision 2: Replace <tt>constexpr!</tt> by <tt>consteval</tt>.
 </p>
 
 <h3>Introduction and motivation</h3>
@@ -41,9 +41,9 @@ call be a constant-expression.  Sometimes, however, we want to express
 that a function should <i>always</i> produce a constant when called (directly
 or indirectly), and a non-constant result should produce an error.  Such a
 function is called an <i>immediate</i> function.  We propose the <i>decl-specifier</i>
-<tt>constexpr!</tt> for that purpose:
+<tt>consteval</tt> for that purpose:
 
-<pre><code class="language-c++">constexpr! int sqr(int n) {
+<pre><code class="language-c++">consteval int sqr(int n) {
   return n*n;
 }
 constexpr int r = sqr(100);  // Okay.
@@ -52,25 +52,26 @@ int r2 = sqr(x);  // Error: Call does not produce a constant.
 </code></pre>
 </p>
 <p>
-There is one exception to the rule that a call to a <tt>constexpr!</tt>
+There is one exception to the rule that a call to a <tt>consteval</tt>
 function must be a constant-expression: If the call appears directly in another
-<tt>constexpr!</tt>, it need not be a constant-expression at that point (since
-a call to the enclosing function would ultimately have to produce a core constant
-expression, we do not have to worry about ever having to evaluate that nested
-call at run time).  This permits composition of <tt>constexpr!</tt> functions:
+<tt>consteval</tt> function, it need not be a constant-expression at that point
+(since a call to the enclosing function would ultimately have to produce a core
+constant expression, we do not have to worry about ever having to evaluate that
+nested call at run time).  This permits composition of <tt>consteval</tt>
+functions:
 
-<pre><code class="language-c++">constexpr! int sqrsqr(int n) {
+<pre><code class="language-c++">consteval int sqrsqr(int n) {
   return sqr(sqr(n)); // Not a constant-expression at this  point,
 }                     // but that's okay.
 
 constexpr int dblsqr(int n) {
   return 2*sqr(n); // Error: Enclosing function is not
-}                  // constexpr!.
+}                  // consteval.
 </code></pre>
 </p>
 <p>
 Finally, as is the case with a bound member function (e.g., "<tt>x.f</tt>"),
-a <tt>constexpr!</tt> function can only be called; no pointer or reference
+a <tt>consteval</tt> function can only be called; no pointer or reference
 to it can be formed:
 
 <pre><code class="language-c++">using Int2Int = int(int);
@@ -81,7 +82,7 @@ Int2Int *pf = sqr;  // Error.
 One consequence of this specification is that an immediate function never needs
 to be seen by a back end.  That means that immediate functions are an alternative
 to many function-style macros.  It also means that, unlike plain <tt>constexpr</tt>
-functions, <tt>constexpr!</tt> functions are unlikely to show up in symbolic
+functions, <tt>consteval</tt> functions are unlikely to show up in symbolic
 debuggers.  That runs into the broader issue that programmers currently have few
 tools to debug compile-time evaluation: This proposal does not aim at solving
 that problem in any way.
@@ -110,14 +111,14 @@ invocation is sampled where <tt>my_log_function</tt> is called instead of
 where it is defined.
 </p>
 <p>
-Immediate (i.e., <tt>constexpr!</tt>) functions, however, create a clean separation
+Immediate (i.e., <tt>consteval</tt>) functions, however, create a clean separation
 between the compilation process and the constexpr evaluation process (see also 
 <a href="http://wg21.link/p0992r0">P0992</a>).
 Thus, we can make <tt>source_location::current()</tt> an immediate function, and wrap
 it as needed in other immediate functions: The value produced will correspond to the
 source location of the "root" immediate function call.  For example:
 <pre><code class="language-c++">
-constexpr! src_line() {
+consteval src_line() {
   return source_location::current().line();
 }
 
@@ -130,11 +131,11 @@ void some_code() {
 
 <h4>Variables</h4>
 <p>
-Given that <tt>constexpr!</tt> functions are a useful alternative to function-style
-macros, it is natural to wonder whether we could make <tt>constexpr!</tt>
+Given that <tt>consteval</tt> functions are a useful alternative to function-style
+macros, it is natural to wonder whether we could make <tt>consteval</tt>
 <i>variables</i> a useful alternative to non-function-style macros.  We'd call such
 variables &mdash; which would never be seen by a back end &mdash; <i>immediate</i> variables:
-<pre><code class="language-c++">constexpr! int RN = 42;
+<pre><code class="language-c++">consteval int RN = 42;
 int LN = 42;
 
 int f(int const&);
@@ -174,8 +175,31 @@ of the discussion of P0595r0.  At the time, the following poll was recorded:
 	SF: 8 | F: 13 | N: 2 | A: 0 | SA: 0
 </blockquote>
 (See <a href="http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0">http://wiki.edg.com/bin/view/Wg21kona2017/P0595R0</a>.
-The syntax under consideration at that time was <tt>do constexpr</tt> instead of <tt>constexpr!</tt>.)
+The syntax under consideration at that time was <tt>do constexpr</tt> instead of <tt>consteval</tt>.)
 </p>
+<p>
+At the Rapperswil meeting in 2018, essentially this proposal
+<a href="http://wiki.edg.com/bin/view/Wg21rapperswil2018/P1073R0-Rap18">was
+accepted</a> by EWG except the specifier <tt>constexpr!</tt> was used instead
+of <tt>consteval</tt>. There was some discussion of syntax at the time, but the
+proposed spelling had reasonably strong support:
+<blockquote>
+	Proposal as presented for C++20<br/>
+	SF: 19 | F: 22 | N: 1 | A: 2 | SA: 0<br/>
+	<br/>
+	Use "true constexpr" instead of "constexpr!"<br/?
+	SF: 5 | F: 8 | N: 14 | A: 8 | SA: 10<br/>
+</blockquote>
+However, reflector discussions later indicated an alternative would be
+preferred.  This paper presents one such an alternative.  Another that
+is also liked is <tt>constfold</tt> (if that happens to be preferred,
+a simple search-and-replace in the proposed wording below is all that
+is needed).
+Both <tt>consteval</tt> and <tt>constfold</tt> were searched for in Google's extensive codebase
+(which includes many open-source projects in addition to Google's own
+code) and no conflicts were found.
+</p>
+
 
 <h4>Acknowledgments</h4>
 
@@ -184,30 +208,7 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 
 <h2>Wording changes</h2>
 
-<p>Add to the productions of [lex.pptoken]:</p>
-<blockquote style="padding-left: 30px;">
-	<i>preprocessing-token</i>:<br/>
-	<tab><i>header-name</i><br/>
-	<tab><ins><tt>constexpr!</tt></ins><br/>
-	<tab><i>identifier</i><br/>
-	<tab><i>pp-number</i><br/>
-	<tab><i>character-literal</i><br/>
-	<tab><i>user-defined-character-literal</i><br/>
-	<tab><i>string-literal</i><br/>
-	<tab><i>user-defined-string-literal</i><br/>
-	<tab><i>preprocessing-op-or-punc</i><br/>
-	<tab>each non-white-space character that cannot be one of the above<br/>
-</blockquote>
-
-<p>Change the first sentence of [lex.key] paragraph 1 as follows:</p>
-<blockquote style="padding-left: 30px;">
-	The <del>identifiers</del><ins>tokens</ins> shown in Table 5
-	<ins>(all <i>identifier</i>s, except for <tt>constexpr!</tt>)</ins>
-	are reserved for use as keywords (that is, they are unconditionally
-	treated as keywords in phase 7) except in an <i>attribute-token</i>
-	(10.6.1):
-</blockquote>
-<p>and add the keyword <tt>constexpr!</tt> to Table 5 ("Keywords")
+<p>Add the keyword <tt>consteval</tt> to Table 5 ("Keywords")
    in [lex.key].</p>
 
 <p>Add to the grammar of [dcl.spec] paragraph 1:</p>  
@@ -219,7 +220,7 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 	<tab><tt>friend</tt><br/>
 	<tab><tt>typedef</tt><br/>
 	<tab><tt>constexpr</tt><br/>
-	<tab><ins><tt>constexpr!</tt></ins><br/>
+	<tab><ins><tt>consteval</tt></ins><br/>
 	<tab><tt>inline</tt>
 </blockquote>
 
@@ -228,14 +229,14 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 	In the <i>decl-specifier-seq</i> of the <i>lambda-declarator</i>,
 	each <i>decl-specifier</i> shall <del>either</del> be
 	<ins>one of</ins> <tt>mutable</tt><ins>, </ins><del> or</del>
-	<tt>constexpr</tt><ins>, or <tt>constexpr!</tt></ins>.
+	<tt>constexpr</tt><ins>, or <tt>consteval</tt></ins>.
 	[ <i>Note:</i> The trailing <i>requires-clause</i> is described
 	  in Clause 11. <i>&mdash; end note</i> ]
 </blockquote>
 
 <p>Append to [dcl.spec] paragraph 2:</p>  
 <blockquote style="padding-left: 30px;">
-	<ins>The <tt>constexpr</tt> and <tt>constexpr!</tt> shall not both appear in a
+	<ins>The <tt>constexpr</tt> and <tt>consteval</tt> shall not both appear in a
 	<i>decl-specifiers-seq</i>.</ins>
 </blockquote>
 
@@ -243,29 +244,29 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 <blockquote style="padding-left: 30px;">
 	The <tt>constexpr</tt>specifier shall be applied only to the definition of a variable or
 	variable template or the declaration of a function or function template.
-	<ins>The <tt>constexpr!</tt>specifier shall be applied only to the definition of a
+	<ins>The <tt>consteval</tt> specifier shall be applied only to the definition of a
 	function or function template.</ins>	A function or static data member declared with the <tt>constexpr</tt>
-	<ins>or	<tt>constexpr!</tt> </ins>specifier is implicitly an inline function or variable (10.1.6). If any
+	<ins>or	<tt>consteval</tt> </ins>specifier is implicitly an inline function or variable (10.1.6). If any
 	declaration of a function or function template has a <tt>constexpr</tt> <ins> or
-	<tt>constexpr!</tt> </ins>specifier, then all its declarations shall contain
+	<tt>consteval</tt> </ins>specifier, then all its declarations shall contain
 	<del>the constexpr</del><ins>that same</ins> specifier. [ <i>Note:</i> An explicit specialization can differ
 	from the template declaration with respect to the <tt>constexpr</tt>
-	<ins>or <tt>constexpr!</tt> </ins>specifier. <i>&mdash; end note</i> ]
+	<ins>or <tt>consteval</tt> </ins>specifier. <i>&mdash; end note</i> ]
 	[<i>Note:</i> Function parameters cannot be declared <tt>constexpr</tt>. <i>&mdash; end note</i> ]
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 2 as follows:</p>
 <blockquote style="padding-left: 30px;">
-	A <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier used in the declaration of a function
+	A <tt>constexpr</tt> <ins>or <tt>consteval</tt> </ins>specifier used in the declaration of a function
 	that is not a constructor declares that function to be a <i>constexpr function</i>. Similarly, a
-	<tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier used in a constructor declaration
+	<tt>constexpr</tt> <ins>or <tt>consteval</tt> </ins>specifier used in a constructor declaration
 	declares that constructor to be a <i>constexpr constructor</i>.<ins>  A function or constructor declared
-	with the <tt>constexpr!</tt> specifier is called an <i>immediate function</i>.</ins>
+	with the <tt>consteval</tt> specifier is called an <i>immediate function</i>.</ins>
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 8 as follows:</p>
 <blockquote style="padding-left: 30px;">
-	The <tt>constexpr</tt> <ins>or <tt>constexpr!</tt> </ins>specifier has no effect on the type of a
+	The <tt>constexpr</tt> <ins>or <tt>consteval</tt> </ins>specifier has no effect on the type of a
 	constexpr function or a constexpr constructor.
 </blockquote>
 
@@ -315,7 +316,7 @@ and add an example at the end of the paragraph:
   using ineffective = decltype(bad_assert_copyable&lt;N&gt;());
     // bad_assert_copyable&lt;N&gt; is not needed for constant evaluation
     // (and thus not instantiated)
-  template&lt;typename T&gt; constexpr! void assert_copyable() { T t; T t2 = t; }
+  template&lt;typename T&gt; consteval void assert_copyable() { T t; T t2 = t; }
   using check = decltype(assert_copyable&lt;N&gt;());
     // error: assert_copyable&lt;N&gt; is instantiated (because it is needed for constant
     // evaluation), but the attempt to copy t is ill-formed
@@ -326,7 +327,7 @@ and add an example at the end of the paragraph:
 <p>Update [dcl.fct.def.default] paragraph 3 as follows:</p>
 <blockquote style="padding-left: 30px;">
 An explicitly-defaulted function that is not defined as deleted may be declared
-<tt>constexpr</tt> <ins>or constexpr! </ins>only if it would have been implicitly
+<tt>constexpr</tt> <ins>or consteval </ins>only if it would have been implicitly
 declared as <tt>constexpr</tt>. [...]
 </blockquote>
 
@@ -334,24 +335,18 @@ declared as <tt>constexpr</tt>. [...]
 <blockquote style="padding-left: 30px;">
 	[...]An explicit instantiation of a function template, member function of a class template,
 	or variable template shall not use the <tt>inline</tt><del> or</del><ins>,</ins>
-	<tt>constexpr</tt><ins>, or <tt>constexpr!</tt></ins> specifiers.
+	<tt>constexpr</tt><ins>, or <tt>consteval</tt></ins> specifiers.
 </blockquote>
 
 
-<p>Add a paragraph to [diff.cpp17.lex] with the following content:</p>
+<p>Change [diff.cpp17.lex] paragraph 1 as follows:</p>
 <blockquote style="padding-left: 30px;">
-	<b>Affected subclause:</b> 5.4 [lex.pptoken]</br>
-	<b>Change:</b> New <i>preprocessing-token</i></br>
-	<b>Rationale:</b> Required for new feature. The <tt>constexpr!</tt>
-	token is added to define immediate functions.  It is a
-	<i>preprocessing-token</i> to prevent it from being spelled as
-	<tt>constexpr not</tt>.</br>
-	<b>Effect on original feature:</b> Valid ISO C++ 2017 using adjacent
-	preprocessing tokens <tt>constexpr</tt> and <tt>!</tt> may not be
-	valid in this International Standard: <pre><tt>
-  #define M(x) x##constexpr!=0 // </tt><i>error: pasting </i><tt>X</tt><i> with </i><tt>constexpr!</tt><i> does not form a valid token</i><tt>
-  void f() { int Xconstexpr = 0; if (M(X)) {} }
-	</tt></pre>
+	<p>...<br/>
+	<b>Rationale:</b> ... <ins>The <tt>consteval</tt> keyword is added to declare
+		immediate functions (_dcl.constexpr_).</ins><br/>
+	<b>Effect on original feature:</b> Valid ISO C++ 2017 code using
+	<tt>concept</tt><ins>, <tt>consteval</tt>,</ins> or <tt>requires</tt>
+	as an identifier is not valid in this International Standard.</p>
 </blockquote>
 
 </body></html>
