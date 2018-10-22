@@ -22,6 +22,7 @@
 </p>
 
 <p align="right">
+<br>Peter Dimov (pdimov@pdimov.com)
 <br>Louis Dionne (ldionne.2@gmail.com)  
 <br>Nina Ranns (dinka.ranns@gmail.com)
 <br>Richard Smith (richard@metafoo.co.uk)  
@@ -37,8 +38,9 @@
 <br><tab2>EWG approved the proposal as presented: SF: 23 | F: 11 | N: 0 | A: 0 | SA: 0
 <br>R2: Implemented core review comments.
 <br>R3: Extends proposal for non-transient allocations.
-<br>R4: Tighten wording for "construct" and "destruct"
-<br>R5: Remove prohibition on virtual destructors and pseudo-destructor calls
+<br>R4: Tighten wording for "construct" and "destruct".
+<br>R5: Remove prohibition on virtual destructors (i.e., merge in P1077) and pseudo-destructor calls (an earlier oversight).
+<br><tab2> Also rebase on N4762.
 </p>
 
 <h3>Introduction and motivation</h3>
@@ -130,7 +132,18 @@ allocation.  The constexpr evaluation of the destructor would also be
 successful and would deallocate the non-transient allocation. The non-transient
 allocation is therefore promoted to static storage.</p>
 
-
+<h3>Non-transient allocation</h3>
+<p>In Rapperswil, Peter Dimov proposed (P1077) to let literal types have
+virtual destructors.  That proposal passed easily:
+	<br><tab2>Allowing literal types to have virtual destructors:
+	<br><tab2>SF: 11 | F: 12 | N: 2 | A: 0 | SA: 0
+</p>
+<p>The notion of <i>quasi-trivial destructor</i> in P1077, however,
+is subsumed by this paper's notion of <i>constexpr destructor</i>.
+It was therefore decided to merge P1077 into this paper (with P1064,
+which permits virtual constexpr functions already approved by WG21
+and edited into the current draft working paper).</p>
+	
 <h3>Implementation experience</h3>
 
 <p>So far, this has not been implemented. However, based on preliminary
@@ -151,7 +164,7 @@ have been identified at the moment.</p>
 	See further down for allocation-related changes.
 </i></p>
 
-<p>Change in [basic.types] paragraph 10.5.1:</p>
+<p>Change in [basic.types] bullet 10.5.1:</p>
 <blockquote style="padding-left: 30px;">&mdash; it has a 
 <del>trivial</del><ins>constexpr</ins> 
 destructor,
@@ -162,9 +175,9 @@ destructor,
 
 <blockquote>An expression <code>e</code> is a <i>core constant expression</i>
 unless the evaluation of <code>e</code>, following the rules of the abstract
-machine (4.6), would evaluate one of the following expressions:</blockquote>
+machine (6.8.1), would evaluate one of the following expressions:</blockquote>
 
-<blockquote style="padding-left: 30px;"> &mdash; <code>this</code> (8.1.2),
+<blockquote style="padding-left: 30px;"> &mdash; <code>this</code> (7.5.2),
 except in a constexpr function<del> or</del><ins>,</ins> a constexpr
 constructor,<ins> or a constexpr destructor</ins> that is being
 evaluated as part of e;
@@ -173,8 +186,8 @@ evaluated as part of e;
 <blockquote style="padding-left: 30px;"> &mdash; an invocation of a function
 other than a constexpr constructor <ins>or destructor </ins>for a
 literal class,<ins>or </ins> a constexpr function <del>, or an implicit
-invocation of a trivial destructor (15.4)</del> [ <i>Note:</i>
-Overload resolution (16.3) is applied as usual — <i>end note</i> ];
+invocation of a trivial destructor (10.3.7)</del> [ <i>Note:</i>
+Overload resolution (11.3) is applied as usual — <i>end note</i> ];
 </blockquote>
 
 <blockquote style="padding-left: 30px;"> &mdash; an invocation of an
@@ -186,7 +199,7 @@ constexpr constructor,<ins> or an undefined constexpr destructor</ins>;
 instantiated constexpr function<del> or</del><ins>,</ins> a constexpr
 constructor,<ins> or a constexpr destructor</ins> that fails to satisfy the
 requirements for a constexpr function<del> or</del><ins>,</ins> a constexpr
-constructor,<ins> or a constexpr destructor</ins> (10.1.5);
+constructor,<ins> or a constexpr destructor</ins> (9.1.5);
 </blockquote>
 
 
@@ -210,7 +223,7 @@ invocation of a constexpr destructor for <code>x</code>. </ins>
 </blockquote>
 
 <blockquote style="padding-left: 30px;"> &mdash; modification of an object
-(8.18, 8.2.6, 8.3.2) unless it is applied to a non-volatile lvalue of literal
+(7.6.18, 7.6.1.6, 7.6.2.2) unless it is applied to a non-volatile lvalue of literal
 type that refers to <del> non-volatile object whose lifetime began within the
 evaluation of <code>e</code></del>
 </blockquote>
@@ -290,7 +303,7 @@ constexpr destructor</ins>.
 <p>Change in [dcl.constexpr] paragraph 9:</p>
 
 <blockquote>In any <code>constexpr</code> variable declaration, the
-full-expression of the initialization shall be a constant expression (8.20).
+full-expression of the initialization shall be a constant expression (7.7).
 <ins>A <code>constexpr</code> variable shall have constant
 destruction.</ins>
 </blockquote>
@@ -312,7 +325,7 @@ declaration (if any) shall be <code>friend</code>, <code>inline</code>,
 destructor, or </ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>&mdash; all the destructors
+<blockquote style="padding-left: 30px;"><ins>&mdash; any destructors
 it invokes are constexpr destructors</ins>
 </blockquote>
 
@@ -327,7 +340,7 @@ it invokes are constexpr destructors</ins>
 <p>Modify [expr.new] paragraph 10</p>
 
 <blockquote>An implementation is allowed to omit a call to a replaceable global
-allocation function (21.6.2.1, 21.6.2.2).  When it does so, the storage
+allocation function (16.6.2.1, 16.6.2.2).  When it does so, the storage
 is instead provided by the implementation or provided by extending the
 allocation of another <i>new-expression.</i>
 </blockquote>
@@ -431,11 +444,11 @@ of <code>e2</code> is sequenced before the evaluation of the
 
 <p>Change in [expr.const] paragraph 2:</p>
 
-<blockquote><del>&mdash; a pseudo-destructor call (???);</del>
+<blockquote><del>&mdash; a pseudo-destructor call (7.6.1.10);</del>
 </blockquote>
 <blockquote>...</blockquote>
 	
-<blockquote><del>&mdash; a <i>new-expression (8.3.4)</i>;</del>
+<blockquote><del>&mdash; a <i>new-expression (7.6.2.4)</i>;</del>
 </blockquote>  
 
 <!--
@@ -445,12 +458,12 @@ function (21.6.2.1, 21.6.2.2), or a <i>placement
 new-expression</i> (8.3.4);</ins>
 </blockquote>    
 -->
-<blockquote>&mdash; <ins>a <i>new-expression</i> (8.3.4),
+<blockquote>&mdash; <ins>a <i>new-expression</i> (7.6.2.4),
 unless the selected allocation function is a replaceable global allocation
-function (21.6.2.1, 21.6.2.2);</ins>
+function (16.6.2.1, 16.6.2.2);</ins>
 </blockquote>    
 
-<blockquote><del>&mdash; a <i>delete-expression (8.3.5)</i>;</del>
+<blockquote><del>&mdash; a <i>delete-expression (7.6.2.5)</i>;</del>
 </blockquote>   
 
 	
@@ -499,7 +512,7 @@ _allocator.traits,members_, is a valid core constant expression unless
 	<ul class="dashed">
 	<li> if the value is of pointer type, it contains the address of an
 	     object with static storage duration, the address past the
-	     end of such an object (8.5.6), the address of a function,
+	     end of such an object (7.6.6), the address of a function,
 	     or a null pointer value, and
 	</li></ul>
 </blockquote>
@@ -509,7 +522,7 @@ to:
 	<li> if the value is of pointer type, it contains
 		<ul class="dashed">
 		<li>the address of an object with static storage duration or 
-		    the address past the end such an object (8.5.6), or</li>
+		    the address past the end such an object (7.6.6), or</li>
 		<li>the address of a function, or</li>
 		<li>a null pointer value, or,</li>
 		<li>if the prvalue under consideration initializes a constexpr variable,
