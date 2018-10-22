@@ -17,7 +17,7 @@
 
 
 <body>
-<p align="right"><b>D0784R5, 2018-06-29</b>
+<p align="right"><b>D0784R5, 2018-10-22</b>
 <br>CWG, LWG
 </p>
 
@@ -37,7 +37,8 @@
 <br><tab2>EWG approved the proposal as presented: SF: 23 | F: 11 | N: 0 | A: 0 | SA: 0
 <br>R2: Implemented core review comments.
 <br>R3: Extends proposal for non-transient allocations.
-<br>R4 (this revision): Tighten wording for "construct" and "destruct"
+<br>R4: Tighten wording for "construct" and "destruct"
+<br>R5: Remove prohibition on virtual destructors and pseudo-destructor calls
 </p>
 
 <h3>Introduction and motivation</h3>
@@ -69,7 +70,7 @@ class type might look something like:</p>
 <h3>Non-transient allocation</h3>
 <p>
 Earlier versions of this paper (<a href="http://wg21.link/P0784R1">P0784r1</a> and
-<a href="http://wg21.link/P0784R2">P0784r2</a>) proposed the changes need for
+<a href="http://wg21.link/P0784R2">P0784r2</a>) proposed the changes needed for
 constexpr destructors and for so-called "transient constexpr allocations".
 Transient constexpr allocations are dynamic memory allocations occurring
 during a constexpr evaluation that are deallocated before that
@@ -244,7 +245,7 @@ of a function that is not a constructor<ins> or a destructor</ins>
 declares that function to be a <i>constexpr function</i>. Similarly,
 a  <code>constexpr</code> specifier used in a constructor declaration
 declares that constructor to be a <i>constexpr constructor</i>.
-<ins> A  <code>constexpr</code> specifier used in a destructor
+<ins> A <code>constexpr</code> specifier used in a destructor
 declaration declares that destructor to be a
 <i>constexpr destructor</i>.</ins>
 </blockquote>
@@ -254,10 +255,9 @@ declaration declares that destructor to be a
 <blockquote><ins>The definition of a <code>constexpr</code> destructor
 shall satisfy the following requirements:</ins>
 </blockquote>
-<blockquote style="padding-left: 30px;"><ins>&mdash; it shall not be virtual</ins></blockquote>
+
 <blockquote style="padding-left: 30px;"><ins>&mdash; the class shall not
-have any virtual base classes;</ins>
-</blockquote>
+have any virtual base classes;</ins></blockquote>
 
 <blockquote style="padding-left: 30px;"><ins>&mdash; its
 <i>function-body</i> shall satisfy the requirements for a
@@ -312,8 +312,8 @@ declaration (if any) shall be <code>friend</code>, <code>inline</code>,
 destructor, or </ins>
 </blockquote>
 
-<blockquote style="padding-left: 30px;"><ins>&mdash; it is not virtual
-and all the destructors it invokes are constexpr destructors</ins>
+<blockquote style="padding-left: 30px;"><ins>&mdash; all the destructors
+it invokes are constexpr destructors</ins>
 </blockquote>
 
 
@@ -431,6 +431,10 @@ of <code>e2</code> is sequenced before the evaluation of the
 
 <p>Change in [expr.const] paragraph 2:</p>
 
+<blockquote><del>&mdash; a pseudo-destructor call (???);</del>
+</blockquote>
+<blockquote>...</blockquote>
+	
 <blockquote><del>&mdash; a <i>new-expression (8.3.4)</i>;</del>
 </blockquote>  
 
