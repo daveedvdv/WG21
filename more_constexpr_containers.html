@@ -482,24 +482,46 @@ expression, the evaluation of a call to a member function of
 where <tt>T</tt> is a literal type,
 is permitted even if the actual evaluation of such a call would
 otherwise fail the requirements for a core constant expression.
-Similarly, the evaluation of a call to a member function of
-<tt>std::allocator_traits&lt;std::allocator&lt;T&gt;&gt;</tt> as defined in
-_allocator.traits,members_, is a valid core constant expression unless
+Similarly, the evaluation of a call to <tt>std::destroy_at</tt> or
+<tt>std::construct_at</tt> is a valid core constant expression unless
 
 <blockquote>
 	<ul class="dashed">
-	<li><ins>for a call to the member <tt>construct</tt>,
-	the second argument, of type T*, does not point to storage
+	<li><ins>for a call to <tt>std::construct_at</tt> the
+	first argument,	of type T*, does not point to storage
 	allocated with <tt>std::allocator&lt;T&gt;</tt> or
 	the evaluation of the underlying constructor call is
 	not a core constant expression, or</ins></li>
 
-	<li><ins>for a call to the member <tt>destroy</tt>,
-	the second argument, of type T*, does not point to storage
+	<li><ins>for a call to the member <tt>std::destroy-at</tt>,
+	the first argument, of type T*, does not point to storage
 	allocated with <tt>std::allocator&lt;T&gt;</tt> or
 	the evaluation of the underlying destructor call is
 	not a core constant expression.</ins></li>
 </blockquote>
+</ins></blockquote>
+
+<p>In [memory.syn] paragraph 1 and [specialized.destroy] paragraph 1
+add the <tt>constexpr</tt> specifier to the declaration of
+<tt>destroy_at</tt>.</p>
+
+<p>In [memory.syn] paragraph 1, after the declarations of <tt>destroy</tt>
+add a declaration for <tt>construct_at</tt> as follows</tt>
+	
+<blockquote><ins>
+<tt>template&lt;class T, class... Args&gt;<br>
+	<tab><tab>void construct_at(T* location, Args&&... args);</tt>
+</ins></blockquote>
+
+<p> and following [specialized.destroy] add a new subsection
+	[specialized.construct] as follows:</p>
+
+<blockquote><ins>
+<tt>template&lt;class T, class... Args&gt;<br>
+	<tab><tab>void construct_at(T* location, Args&&... args);</tt><br>
+<br>
+<i>Effects:</i> Equivalent to:<br>
+<tt><tab><tab><tab>new ((void*)location) T(std::forward<Args>(args)...)
 </ins></blockquote>
 
 <p><i>
