@@ -514,7 +514,7 @@ add a declaration for <tt>construct_at</tt> as follows</tt>
 	
 <blockquote><ins>
 <tt>template&lt;class T, class... Args&gt;<br>
-	<tab><tab>void construct_at(T* location, Args&&... args);</tt>
+	<tab><tab>constexpr void construct_at(T* location, Args&&... args);</tt>
 </ins></blockquote>
 
 <p> and following [specialized.destroy] add a new subsection
