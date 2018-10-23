@@ -524,6 +524,28 @@ add a declaration for <tt>construct_at</tt> as follows</tt>
 <tt><tab><tab><tab>new ((void*)location) T(std::forward<Args>(args)...)
 </ins></blockquote>
 
+<p>Modify [allocator.traits.members] paragraph 5 (about the <tt>construct<tt>
+member) as follows:<br>
+<blockquote>
+	<i>Effects</i>: Calls <tt>a.construct(p, std::forward&lt;Args&gt;(args)...)</tt>
+	if that call is well-formed; otherwise, invokes
+	<del><tt>::new (static_cast&lt;void*&gt;(p)) T(std::forward&lt;Args&gt;(args)...)</tt></del>
+	<ins><tt>std::construct_at(p, std::forward&lt;Args&gt;(args)...)</tt></del>.
+</blockquote>
+</p>	
+
+<p>Modify [allocator.traits.members] paragraph 6 (about the <tt>destroy<tt>
+member) as follows:<br>
+<blockquote>
+	<i>Effects</i>: Calls <tt>a.destroy(p)</tt>
+	if that call is well-formed; otherwise, invokes
+	<del><tt>p->~T()</tt></del>
+	<ins><tt>std::destroy_at(p)</tt></del>.
+</blockquote>
+This change is not strictly needed, but included for symmetry.
+</p>
+
+
 <p><i>
 	<b>Note 5: </b>The following changes enable non-transient
 	allocations.
