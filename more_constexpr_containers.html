@@ -39,8 +39,10 @@
 <br>R2: Implemented core review comments.
 <br>R3: Extends proposal for non-transient allocations.
 <br>R4: Tighten wording for "construct" and "destruct".
-<br>R5: Remove prohibition on virtual destructors (i.e., merge in P1077) and pseudo-destructor calls (an earlier oversight).
-<br><tab2> Also rebase on N4762.
+<br>R5 (this revision):
+	<br><tab2>Remove prohibition on virtual destructors (i.e., merge in P1077) and pseudo-destructor calls (an earlier oversight).
+	<br><tab2>Replace <tt>construct</tt>/<tt>destruct</tt> interception by <tt>construct_at</tt>/<tt>destroy_at</tt>.
+	<br><tab2> Also rebase on N4762. 
 </p>
 
 <h3>Introduction and motivation</h3>
@@ -521,10 +523,10 @@ add a declaration for <tt>construct_at</tt> as follows</tt>
 	<tab><tab>void construct_at(T* location, Args&&... args);</tt><br>
 <br>
 <i>Effects:</i> Equivalent to:<br>
-<tt><tab><tab><tab>new ((void*)location) T(std::forward<Args>(args)...)
+<tt><tab><tab><tab>new ((void*)location) T(std::forward<Args>(args)...)</tt>
 </ins></blockquote>
 
-<p>Modify [allocator.traits.members] paragraph 5 (about the <tt>construct<tt>
+<p>Modify [allocator.traits.members] paragraph 5 (about the <tt>construct</tt>
 member) as follows:<br>
 <blockquote>
 	<i>Effects</i>: Calls <tt>a.construct(p, std::forward&lt;Args&gt;(args)...)</tt>
@@ -534,7 +536,7 @@ member) as follows:<br>
 </blockquote>
 </p>	
 
-<p>Modify [allocator.traits.members] paragraph 6 (about the <tt>destroy<tt>
+<p>Modify [allocator.traits.members] paragraph 6 (about the <tt>destroy</tt>
 member) as follows:<br>
 <blockquote>
 	<i>Effects</i>: Calls <tt>a.destroy(p)</tt>
@@ -542,7 +544,6 @@ member) as follows:<br>
 	<del><tt>p->~T()</tt></del>
 	<ins><tt>std::destroy_at(p)</tt></del>.
 </blockquote>
-This change is not strictly needed, but included for symmetry.
 </p>
 
 
