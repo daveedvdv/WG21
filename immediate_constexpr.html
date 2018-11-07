@@ -7,7 +7,7 @@
   tab { padding-left: 4em }
 </style>
 <body>
-<p align=right><b>P1073R2, 2018-10-04</b>
+<p align=right><b>D1073R3, 2018-11-06</b>
 <br/>CWG
 </p>
 
@@ -261,7 +261,9 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 	that is not a constructor declares that function to be a <i>constexpr function</i>. Similarly, a
 	<tt>constexpr</tt> <ins>or <tt>consteval</tt> </ins>specifier used in a constructor declaration
 	declares that constructor to be a <i>constexpr constructor</i>.<ins>  A function or constructor declared
-	with the <tt>consteval</tt> specifier is called an <i>immediate function</i>.</ins>
+	with the <tt>consteval</tt> specifier is called an <i>immediate function</i>. A destuctor, an
+	allocation function, or a deallocation function shall not be declared with the <tt>consteval</tt>
+	specifier.</ins>
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 8 as follows:</p>
@@ -298,6 +300,19 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 	surrounding the expression is ignored (8.4). <i>&mdash; end note</i> ]</ins>
 </blockquote>
 
+<p>In [expr.const] insert a new paragraph immediately preceding paragraph 8 (the paragraph that
+defines <i>potentially constant evaluated</i>) with the following context:</p>
+<blockquote style="padding-left: 30px;">
+	<ins>An expression E <i>constant-invokes an immediate function f</i> if f's name appears in E,
+		and E does not lexically appear in the <i>function-body</i>
+		(_dcl.fct.def.general_) of an immediate function, and if the immediate function is the
+		unique lookup result or the selected member of a set of overloaded functions
+		(6.4, 11.3, 11.4).  [ Note: This is similar to the notion of a function being named
+		by an expression (_basic.def.odr_). --end note ]  Such an expression shall be a
+		constant expression.
+	</ins>
+</blockquote>		
+
 <p>Insert a bullet after the first bullet (8.6) of the definition of
 <i>needed for constant evaluation</i> in [expr.const] paragraph 8:</p>
 <blockquote style="padding-left: 30px;">
@@ -331,6 +346,14 @@ An explicitly-defaulted function that is not defined as deleted may be declared
 declared as <tt>constexpr</tt>. [...]
 </blockquote>
 
+<p>Add the following paragraph following [class.virtual] paragraph 17:</p>
+<blockquote style="padding-left: 30px;">
+	A <tt>consteval</tt> virtual function shall not override a virtual
+	function that is not <tt>consteval</tt>. A <tt>consteval</tt> virtual
+	function shall not be overriden by a virtual function that is not
+	<tt>consteval</tt>.
+</blockquote>
+		
 <p>Update [temp.explicit] paragraph 1 as follows:</p>
 <blockquote style="padding-left: 30px;">
 	[...]An explicit instantiation of a function template, member function of a class template,
