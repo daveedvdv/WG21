@@ -196,13 +196,13 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 
 <p>Append to [dcl.spec] paragraph 2:</p>  
 <blockquote style="padding-left: 30px;">
-	<ins>The <tt>constexpr</tt> and <tt>consteval</tt> shall not both appear in a
+	<ins>The <tt>constexpr</tt> and <tt>consteval</tt> <i>decl-specifiers</i> shall not both appear in a
 	<i>decl-specifiers-seq</i>.</ins>
 </blockquote>
 
 <p>Update [dcl.constexpr] paragraph 1 as follows:</p>
 <blockquote style="padding-left: 30px;">
-	The <tt>constexpr</tt>specifier shall be applied only to the definition of a variable or
+	The <tt>constexpr</tt> specifier shall be applied only to the definition of a variable or
 	variable template or the declaration of a function or function template.
 	<ins>The <tt>consteval</tt> specifier shall be applied only to the declaration of a
 	function or function template.</ins>	A function or static data member declared with the <tt>constexpr</tt>
@@ -228,8 +228,8 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 
 <p>Update [dcl.constexpr] paragraph 8 as follows:</p>
 <blockquote style="padding-left: 30px;">
-	The <tt>constexpr</tt> <ins>or <tt>consteval</tt> </ins>specifier has no effect on the type of a
-	constexpr function or a constexpr constructor.
+	The <tt>constexpr</tt> <ins>and <tt>consteval</tt> </ins>specifier<ins>s have</ins><del> has</del>
+	no effect on the type of a constexpr function or a constexpr constructor.
 </blockquote>
 
 <p>Add a paragraph after paragraph 2 of [expr.prim.id]:</p>
@@ -257,7 +257,7 @@ Thanks to Vitorrio Romeo for catching a missing wording change.
 defines <i>potentially constant evaluated</i>) with the following context:</p>
 <blockquote style="padding-left: 30px;">
   <ins>An expression E is an <i>immediate invocation</i> if it explicitly or
-    implicitly invokes an immediate function that does not lexically appear in the <i>function-body</i>
+    implicitly invokes an immediate function and does not lexically appear in the <i>function-body</i>
     (_dcl.fct.def.general_) of an immediate function.  An immediate invocation shall be a
   constant expression.</ins>
 </blockquote>		
@@ -266,7 +266,7 @@ defines <i>potentially constant evaluated</i>) with the following context:</p>
 <i>needed for constant evaluation</i> in [expr.const] paragraph 8:</p>
 <blockquote style="padding-left: 30px;">
 	&mdash; a constexpr function ...<br/>
-	<ins>&mdash; an immediate function that immediately invoked, or</ins><br/>
+	<ins>&mdash; an immediate function that is immediately invoked, or</ins><br/>
 	&mdash; a variable ...<br/>
 </blockquote>
 and add an example at the end of the paragraph:
@@ -291,7 +291,7 @@ and add an example at the end of the paragraph:
 <p>Update [dcl.fct.def.default] paragraph 3 as follows:</p>
 <blockquote style="padding-left: 30px;">
 An explicitly-defaulted function that is not defined as deleted may be declared
-<tt>constexpr</tt> <ins>or consteval </ins>only if it would have been implicitly
+<tt>constexpr</tt> <ins>or <tt>consteval</tt> </ins>only if it would have been implicitly
 declared as <tt>constexpr</tt>. [...]
 </blockquote>
 
