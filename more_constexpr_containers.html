@@ -234,12 +234,15 @@ evaluation of <code>e</code>
 <p>Add new paragraph after [expr.const] paragraph 2:</p>
 
 
-<blockquote><ins>An object is said to have <i>constant destruction</i> if: </ins></blockquote>
+<blockquote><ins>An object <i>a</i> is said to have <i>constant destruction</i> if: </ins></blockquote>
 <blockquote style="padding-left: 30px;"><ins> &mdash; it is not of class type nor (possibly multi-dimensional) array thereof, or</ins></blockquote>
-<blockquote style="padding-left: 30px;"><ins> &mdash; such class type has a constexpr destructor and for a hypothetical expression
-<code>e</code> whose only effects are to initialize that object
-using its initializer and then destroy the object,
-<code>e</code> is a core constant expression.</ins>
+<blockquote style="padding-left: 30px;"><ins> &mdash; it is of class type or (possibly multi-dimensional) array thereof,
+    that class type has a constexpr destructor, and for a hypothetical expression
+<code>e</code> whose only effect is to destroy <i>a</i>,
+<code>e</code> would be a core constant expression
+if the lifetime of <i>a</i>
+and its non-mutable subobjects
+were considered to start within <code>e</code>.
 </blockquote>
 
 
@@ -259,13 +262,24 @@ declares that constructor to be a <i>constexpr constructor</i>.</del>
   its return type <ins>(if any)</ins> shall be a literal type;
 </blockquote>
 
+<p>Add a bullet to [dcl.constexpr] paragraph 3:</p>
+
+<blockquote>
+  <ins>if the function is a constructor or destructor,
+    its class shall not have any virtual base classes;</ins>
+</blockquote>
+
 <p>Change in [dcl.constexpr] paragraph 4:</p>
 
 <blockquote>
-The definition of a constexpr constructor shall
+The definition of a constexpr constructor
+<ins>
+whose <i>function-body</i> is not <tt>= delete</tt>
+</ins>
+shall
 <ins>additionally</ins> satisfy the following requirements:
 <ul>
-  <li>the class shall not have any virtual base classes;
+  <li><del>the class shall not have any virtual base classes;</del>
   <li><del>each of the parameter types shall be a literal type;</del>
   <li><del>its function-body shall not be a function-try-block.</del>
 </ul>
@@ -286,10 +300,15 @@ The definition of a constexpr constructor shall
 <p>Insert new paragraph after [dcl.constexpr] paragraph 4:</p>
 
 <blockquote><ins>The definition of a <code>constexpr</code> destructor
+<ins>
+whose <i>function-body</i> is not <tt>= delete</tt>
+</ins>
 shall additionally satisfy the following requirement:</ins>
 </blockquote>
-<blockquote style="padding-left: 30px;"><ins>&mdash; the class shall not
-have any virtual base classes.</ins>
+<blockquote style="padding-left: 30px;"><ins>&mdash;
+    for every subobject of class type
+    or (possibly multi-dimensional) array thereof,
+    that class type shall have a constexpr destructor.</ins>
 </blockquote>
 
 <p>Change in [dcl.constexpr] paragraph 6:</p>
@@ -331,8 +350,8 @@ declaration (if any) shall be <code>friend</code>, <code>inline</code>,
 <p>Add after [class.dtor] paragraph 9:</p>
 
 <blockquote>
-<ins>The defaulted destructor is a constexpr destructor unless
-it invokes a non-constexpr destructor.</ins>
+<ins>The defaulted destructor is a constexpr destructor
+if it satisfies the requirements for a constexpr destructor ([dcl.constexpr]).</ins>
 </blockquote>
 
 
@@ -533,21 +552,22 @@ add sub-bullets as follows:
 <p>Add to end of [expr.const] paragraph 6:
 
 <blockquote>
-	<ins>A <i>non-transient constexpr allocation</i> is a region of storage
-        obtained by an invocation of an allocation function and
-        not passed to a deallocation function
+   <ins>A <i>non-transient constexpr allocation</i>
+        is a region of storage <i>A</i>
+        obtained by an invocation of an allocation function
 	during the initialization of a constexpr
-	variable of class type or (possibly multi-dimensional) array thereof,
+        variable <tt>V</tt> of class type or (possibly multi-dimensional) array thereof,
+        but not passed to a deallocation function
+	during that initialization,
         such that the hypothetical expression considered
-        when determining whether that variable has constant destruction ([expr.const])
-	would deallocate the region of storage.
-        If a non-transient constexpr allocation
-        is deallocated except by the implicit invocation of
-        the associated variable's destructor,
-        the behavior is undefined.
+        when determining whether <tt>V</tt> has constant destruction ([expr.const])
+        would deallocate <i>A</i>.
+        If <i>A</i> is deallocated except by the implicit invocation of <tt>V</tt>'s
+        destructor, the behavior is undefined.
 	</ins>
 </blockquote>
 </p>
 
 
 </ins></body></html>
+
