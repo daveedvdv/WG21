@@ -633,9 +633,11 @@ add sub-bullets as follows:
                     the address past the end such an object (7.6.6), <ins>or</ins></li>
 		<li>the address of a function, or</li>
                 <li>a null pointer value, <ins>or,</ins></li>
-                <li><ins>if the prvalue under consideration initializes a constexpr variable,
-		    an address within or past the end of
-                    a non-transient constexpr allocation (as defined below),</ins></li>
+                <li>[Hubert fix:]<del>if the prvalue under consideration initializes a constexpr variable,</ins>
+		    <ins>an address within or past the end of
+                    a non-transient constexpr allocation (as defined below)
+		    [Hubert fix:] and each object stored in the non-transient allocation 
+		    satisfies the contraints for the value,</ins></li>
 	      and
 	</li></ul>
 </blockquote>
