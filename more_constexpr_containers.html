@@ -475,13 +475,7 @@ of <code>e2</code> is sequenced before the evaluation of the
 <blockquote><del>&mdash; a <i>new-expression (7.6.2.4)</i>;</del>
 </blockquote>  
 
-<!--
-<blockquote>&mdash; <ins>a non <i>placement new-expression</i> (8.3.4),
-unless it would result in a call to a replaceable global allocation
-function (21.6.2.1, 21.6.2.2), or a <i>placement
-new-expression</i> (8.3.4);</ins>
-</blockquote>    
--->
+ 
 <blockquote>&mdash; <ins>a <i>new-expression</i> (7.6.2.4),
 unless the selected allocation function is a replaceable global allocation
 function (16.6.2.1, 16.6.2.2);</ins>
@@ -587,6 +581,17 @@ and the <tt>allocate</tt> and <tt>deallocate</tt> members.</p>
 	allocations.
 </i></p>
 
+<p>Add a bullet after bullet (2.8) in [expr.const] paragraph 2:</p>
+<blockquote>...</blockquote>	
+<blockquote><ins>&mdash; an lvalue-to-rvalue conversion (7.3.1) that is applied to a glvalue
+	designating an object in storage S obtained by an invocation of an allocation function
+	during the initialization of a constexpr variable <tt>V</tt> if S has not been
+	marked as immutable by a call to <tt>std::mark_immutable_if_constexpr</tt> and the
+	lvalue-to-rvalue conversion is applied during the evaluation of the hypothetical
+	expression considered when determining whether <tt>V</tt> has constant destruction
+	([expr.const]);</ins>
+</blockquote>  
+	
 <p>Change in bullet (6.2) of [expr.const] paragraph 6 and
 add sub-bullets as follows:
 <blockquote>
@@ -618,12 +623,34 @@ add sub-bullets as follows:
         such that the hypothetical expression considered
         when determining whether <tt>V</tt> has constant destruction ([expr.const])
         would deallocate <i>A</i>.
+	Such a non-transient constexpr allocation function is
+	<i>immutable</i> if, during the initialization of the constexpr variable,
+	   <tt>std::mark_immutable_if_constexpr</tt> is called with an argument that is
+	   the value returned by the invocation of the allocation function.
         If <i>A</i> is deallocated except by the implicit invocation of <tt>V</tt>'s
         destructor, the behavior is undefined.
 	</ins>
 </blockquote>
+
+
 </p>
 
+	
+<p> Preceding [ptr.launder] add a new subsection
+[alloc.immutable] as follows:</p>
+
+<blockquote><ins>
+<tt>template&lt;class T&gt;<br>
+	<tab><tab>constexpr void mark_immutable_if_constexpr(T* p);</tt><br>
+<br>
+<i>Effects:</i> If called during the initialization of a constexpr
+        variable with an argument that is a pointer value obtained
+		by an invocation of an allocation function during
+		that same initializer and that allocation is
+		a non-transient constexpr allocation, then that
+		allocation is an immutable transient constexpr allocation
+		(_expr.const_).  Otherwise, no effect.
+</ins></blockquote>
 
 </ins></body></html>
 
