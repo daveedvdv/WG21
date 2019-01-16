@@ -493,13 +493,30 @@ of <code>e2</code> is sequenced before the evaluation of the
  
 <blockquote>&mdash; <ins>a <i>new-expression</i> (7.6.2.4),
 unless the selected allocation function is a replaceable global allocation
-function (16.6.2.1, 16.6.2.2);</ins>
+function (16.6.2.1, 16.6.2.2) and either the allocated storage is
+	deallocated within the evaluation of <tt>e</tt> or it
+	is a <i>non-transient constexpr allocation</i> (see below);</ins>
 </blockquote>    
 
-<blockquote><del>&mdash; a <i>delete-expression (7.6.2.5)</i>;</del>
+<blockquote>&mdash; a <i>delete-expression (7.6.2.5)</i><ins>
+	unless it deallocates a region of storage allocated
+	within the evaluation of <tt>e</tt> or it deallocates
+	a <i>non-transient constexpr allocation</i> (see below)</ins>;
 </blockquote>   
 
-	
+<blockquote>&mdash; <ins>a call to an instance of
+	<tt>std::allocator<T>::allocate</tt> (_allocator.members_),
+unless either the allocated storage is
+	deallocated within the evaluation of <tt>e</tt> or it
+	is a <i>non-transient constexpr allocation</i> (see below);</ins>
+</blockquote>    
+
+<blockquote>&mdash; <ins>a call to an instance of
+	<tt>std::allocator<T>::deallocate</tt> (_allocator.members_),
+	unless it deallocates a region of storage allocated
+	within the evaluation of <tt>e</tt> or it deallocates
+	a <i>non-transient constexpr allocation</i> (see below)</ins>;
+</blockquote>  
 
 <p><i>
 	<b>Note 4: </b>The following changes enable the use of the
@@ -589,11 +606,10 @@ and the <tt>allocate</tt> and <tt>deallocate</tt> members.</p>
 <p>In [allocator.globals] declare both comparison operators to be <tt>constexpr</tt>.</p>
 
 
-
 	
 <p><i>
 	<b>Note 5: </b>The following changes enable non-transient
-	allocations.
+	allocations and prevent constexpr allocation leaks.
 </i></p>
 
 <p>Add a bullet after bullet (2.8) in [expr.const] paragraph 2:</p>
