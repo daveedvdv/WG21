@@ -96,10 +96,24 @@ variable initializer if:</p>
 	would deallocate all the <i>non-transient</i> allocations produced by
 	the evaluation of <i>expr</i>.</li>
 </ul>
-
+<p>
 Furthermore, we specify that an attempt to deallocate a non-transiently allocated
 object by any other means results in undefined behavior.  (Note that this is unlikely
-because the object pointing to the allocated storage is immutable.)
+because the object pointing to the allocated storage is immutable.)</p>
+<p>
+A question that arises in this context is whether the non-transient allocation
+is mutable between the completion of the initialization and the	evaluation of 
+the destructor.  If the allocation is mutable, reading from that allocation
+during the destructor evaluation is meaningless and should thus not be accepted
+as part of a core constant expression evaluation.  However, there are cases
+where having a mutable allocation is desirable.  So permit both cases, we
+introduce a library function "std::mark_immutable_if_constexpr" to designate
+that a constexpr allocation is immutable in the context.
+</p>	
+<p>
+Furthermore, we specify that an attempt to deallocate a non-transiently allocated
+object by any other means results in undefined behavior.  (Note that this is unlikely
+because the object pointing to the allocated storage is immutable.)</p>
 
 <p>For example:</p>
 
@@ -115,6 +129,7 @@ template&lt;typename T&gt; struct S: allocator&lt;T&gt; {
     for (int k = 0; k&lt;N; ++k) {
       new(this-&gt;ps+k) T{p[k]};
     }
+    std::mark_immutable_if_constexpr(this-&gt;ps);
   }
   constexpr ~S() {
     for (int k = 0; k&lt;this-&gt;sz; ++k) {
