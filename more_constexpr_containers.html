@@ -593,7 +593,7 @@ add declarations for <tt>construct_at</tt> as follows</tt>
 </ins></blockquote>
 <br/>
 <i>Effects:</i> Equivalent to:<br>
-<tt><tab><tab><tab>::new (<i>voidify</i>(location)) T(std::forward<Args>(args)...)</tt>
+<tt><tab><tab><tab>return ::new (<i>voidify</i>(location)) T(std::forward&lt;Args&gt;(args)...);</tt>
 </ins></blockquote>
 
 <p>Modify [allocator.traits.members] paragraph 5 (about the <tt>construct</tt>
@@ -673,7 +673,7 @@ add sub-bullets as follows:
         such that the hypothetical expression considered
         when determining whether <tt>V</tt> has constant destruction ([expr.const])
         would deallocate <i>A</i>.
-	Such a non-transient constexpr allocation function is
+	Such a non-transient constexpr allocation is
 	<i>immutable</i> if, during the initialization of the constexpr variable,
 	   <tt>std::mark_immutable_if_constexpr</tt> is called with an argument that is
 	   the value returned by the invocation of the allocation function.
@@ -685,7 +685,7 @@ add sub-bullets as follows:
 
 <p>Add a bullet to [temp.arg.nontype] paragraph 2:
 <blockquote>
-	&mdahs; a subobject ([intro.object]),
+	&mdash; a subobject ([intro.object]),
 	<ins>&mdash; an object stored in a non-transient constexpr allocation (_expr.const_),</ins>
 </blockquote>
 </p>
