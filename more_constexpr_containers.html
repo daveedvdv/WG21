@@ -548,7 +548,7 @@ Similarly, the evaluation of a call to <tt>std::destroy_at</tt> or
 	the evaluation of the underlying constructor call is
 	not a core constant expression, or</ins></li>
 
-	<li><ins>for a call to the member <tt>std::destroy_at</tt>,
+	<li><ins>for a call to <tt>std::destroy_at</tt>,
 	the first argument, of type T*, does not point to storage
 	allocated with <tt>std::allocator&lt;T&gt;</tt> or
 	the evaluation of the underlying destructor call is
@@ -557,26 +557,38 @@ Similarly, the evaluation of a call to <tt>std::destroy_at</tt> or
 </ins></blockquote>
 	
 <p>In [memory.syn] paragraph 1 and [specialized.destroy] paragraph 1
-add the <tt>constexpr</tt> specifier to the declaration of
-<tt>destroy_at</tt>.</p>
+add the <tt>constexpr</tt> specifier to the all the declarations of
+<tt>destroy_at</tt>, <tt>destroy</tt>, and <tt>destroy_n</tt> (both
+in namespace <tt>std</tt> and in namespace <tt>std::ranges</tt>).</p>
 
 <p>In [memory.syn] paragraph 1, after the declarations of <tt>destroy</tt>
-add a declaration for <tt>construct_at</tt> as follows</tt>
+add declarations for <tt>construct_at</tt> as follows</tt>
 	
 <blockquote><ins>
-<tt>template&lt;class T, class... Args&gt;<br>
+<tt>template&lt;class T, class... Args&gt;<br/>
 	<tab><tab>constexpr T* construct_at(T* location, Args&&... args);</tt>
+<br/>
+<tt>namespace ranges {
+<tab>template&lt;class T, class... Args&gt;<br/>
+<tab><tab>requires Constructible&lt;T, Args...&gt;<br/>
+<tab><tab><tab>constexpr T* construct_at(T*, Args&&...);</tt>
 </ins></blockquote>
 
 <p> and following [specialized.destroy] add a new subsection
 	[specialized.construct] as follows:</p>
 
 <blockquote><ins>
-<tt>template&lt;class T, class... Args&gt;<br>
-	<tab><tab>constexpr T* construct_at(T* location, Args&&... args);</tt><br>
-<br>
+<tt>template&lt;class T, class... Args&gt;<br/>
+	<tab><tab>constexpr T* construct_at(T* location, Args&&... args);</tt>
+<br/>
+<tt>namespace ranges {
+<tab>template&lt;class T, class... Args&gt;<br/>
+<tab><tab>requires Constructible&lt;T, Args...&gt;<br/>
+<tab><tab><tab>constexpr T* construct_at(T*, Args&&...);</tt>
+</ins></blockquote>
+<br/>
 <i>Effects:</i> Equivalent to:<br>
-<tt><tab><tab><tab>new ((void*)location) T(std::forward<Args>(args)...)</tt>
+<tt><tab><tab><tab>::new (<i>voidify</i>(location)) T(std::forward<Args>(args)...)</tt>
 </ins></blockquote>
 
 <p>Modify [allocator.traits.members] paragraph 5 (about the <tt>construct</tt>
