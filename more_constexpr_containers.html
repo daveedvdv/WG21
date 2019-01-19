@@ -570,8 +570,8 @@ add declarations for <tt>construct_at</tt> as follows</tt>
 	
 <blockquote><ins>
 <tt>template&lt;class T, class... Args&gt;<br/>
-	<tab><tab>constexpr T* construct_at(T* location, Args&&... args);</tt>
-<br/>
+<tab>constexpr T* construct_at(T* location, Args&&... args);</tt>
+<br/><br/>
 <tt>namespace ranges {<br/>
 <tab>template&lt;class T, class... Args&gt;<br/>
 <tab><tab>requires Constructible&lt;T, Args...&gt;<br/>
@@ -584,7 +584,7 @@ add declarations for <tt>construct_at</tt> as follows</tt>
 <blockquote><ins>
 <tt>template&lt;class T, class... Args&gt;<br/>
 <tab>constexpr T* construct_at(T* location, Args&&... args);</tt>
-<br/>
+<br/><br/>
 <tt>namespace ranges {<br/>
 <tab>template&lt;class T, class... Args&gt;<br/>
 <tab><tab>requires Constructible&lt;T, Args...&gt;<br/>
