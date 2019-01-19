@@ -633,11 +633,11 @@ add sub-bullets as follows:
                     the address past the end such an object (7.6.6), <ins>or</ins></li>
 		<li>the address of a function, or</li>
                 <li>a null pointer value, <ins>or,</ins></li>
-                <li>[Hubert fix:]<del>if the prvalue under consideration initializes a constexpr variable,</del>
-		    <ins>an address within or past the end of
+                <li><ins>an address within or past the end of
                     a non-transient constexpr allocation (as defined below)
-		    [Hubert fix:] and each object stored in the non-transient allocation 
-		    satisfies the contraints for the value,</ins></li>
+		    and if, for each object stored in the non-transient allocation,
+		    a prvalue core constant expression with the value of the object
+		    would be a constant expression,</ins></li>
 	      and
 	</li></ul>
 </blockquote>
@@ -664,10 +664,14 @@ add sub-bullets as follows:
         destructor, the behavior is undefined.
 	</ins>
 </blockquote>
-
-
 </p>
 
+<p>Add a bullet to [temp.arg.nontype] paragraph 2:
+<blockquote>
+	&mdahs; a subobject ([intro.object]),
+	<ins>&mdash; an object stored in a non-transient constexpr allocation (_expr.const_),</ins>
+</blockquote>
+</p>
 	
 <p> Preceding [ptr.launder] add a new subsection
 [alloc.immutable] as follows:</p>
