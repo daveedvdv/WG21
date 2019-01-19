@@ -590,8 +590,7 @@ add declarations for <tt>construct_at</tt> as follows</tt>
 <tab><tab>requires Constructible&lt;T, Args...&gt;<br/>
 <tab><tab><tab>constexpr T* construct_at(T*, Args&&...);<br/>
 }</tt>
-</ins></blockquote>
-<br/>
+<br/><br/>
 <i>Effects:</i> Equivalent to:<br>
 <tt><tab><tab><tab>return ::new (<i>voidify</i>(location)) T(std::forward&lt;Args&gt;(args)...);</tt>
 </ins></blockquote>
@@ -685,7 +684,7 @@ add sub-bullets as follows:
 
 <p>Add a bullet to [temp.arg.nontype] paragraph 2:
 <blockquote>
-	&mdash; a subobject ([intro.object]),
+	&mdash; a subobject ([intro.object]),<br/>
 	<ins>&mdash; an object stored in a non-transient constexpr allocation (_expr.const_),</ins>
 </blockquote>
 </p>
