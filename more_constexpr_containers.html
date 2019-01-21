@@ -17,8 +17,8 @@
 
 
 <body>
-<p align="right"><b>D0784R5, 2018-11-13</b>
-<br>CWG, LEWG
+<p align="right"><b>P0784R5, 2019-01-21</b>
+<br>EWG, LEWG, CWG
 </p>
 
 <p align="right">
@@ -40,8 +40,9 @@
 <br>R3: Extends proposal for non-transient allocations.
 <br>R4: Tighten wording for "construct" and "destruct".
 <br>R5 (this revision):
+	<br><tab2Introduce <tt>mark_immutable_if_constexpr</tt> to address some recently found issue.
 	<br><tab2>Remove prohibition on virtual destructors (i.e., merge in P1077) and pseudo-destructor calls (an earlier oversight).
-	<br><tab2>Replace <tt>construct</tt>/<tt>destruct</tt> interception by <tt>construct_at</tt>/<tt>destroy_at</tt>.
+	<br><tab2>Replace <tt>construct</tt>/<tt>destruct</tt> interception by <tt>construct_at</tt>/<tt>destroy_at</tt> (and friends_.
 	<br><tab2>Integrate San Diego CWG review notes.
 	<br><tab2> Also rebase on N4778. 
 </p>
