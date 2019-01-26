@@ -17,7 +17,7 @@
 
 
 <body>
-<p align="right"><b>P0784R5, 2019-01-21</b>
+<p align="right"><b>D0784R6, 2019-01-21</b>
 <br>EWG, LEWG, CWG
 </p>
 
@@ -576,7 +576,7 @@ add declarations for <tt>construct_at</tt> as follows</tt>
 <tt>namespace ranges {<br/>
 <tab>template&lt;class T, class... Args&gt;<br/>
 <tab><tab>requires Constructible&lt;T, Args...&gt;<br/>
-<tab><tab><tab>constexpr T* construct_at(T*, Args&&...);</tt>
+<tab><tab><tab>constexpr T* construct_at(T* location, Args&&... args);</tt>
 </ins></blockquote>
 
 <p> and following [specialized.destroy] add a new subsection
@@ -589,7 +589,7 @@ add declarations for <tt>construct_at</tt> as follows</tt>
 <tt>namespace ranges {<br/>
 <tab>template&lt;class T, class... Args&gt;<br/>
 <tab><tab>requires Constructible&lt;T, Args...&gt;<br/>
-<tab><tab><tab>constexpr T* construct_at(T*, Args&&...);<br/>
+<tab><tab><tab>constexpr T* construct_at(T* location, Args&&... args);<br/>
 }</tt>
 <br/><br/>
 <i>Effects:</i> Equivalent to:<br>
