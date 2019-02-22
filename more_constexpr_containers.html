@@ -17,8 +17,8 @@
 
 
 <body>
-<p align="right"><b>D0784R6, 2019-01-21</b>
-<br>EWG, LEWG, CWG
+<p align="right"><b>D0784R6, 2019-02-21</b>
+<br>LEWG, CWG
 </p>
 
 <p align="right">
@@ -39,12 +39,16 @@
 <br>R2: Implemented core review comments.
 <br>R3: Extends proposal for non-transient allocations.
 <br>R4: Tighten wording for "construct" and "destruct".
-<br>R5 (this revision):
-	<br><tab2Introduce <tt>mark_immutable_if_constexpr</tt> to address some recently found issue.
+<br>R5 (submitted for Kona 2019):
+	<br><tab2>Introduce <tt>mark_immutable_if_constexpr</tt> to address some recently found issue.
 	<br><tab2>Remove prohibition on virtual destructors (i.e., merge in P1077) and pseudo-destructor calls (an earlier oversight).
 	<br><tab2>Replace <tt>construct</tt>/<tt>destruct</tt> interception by <tt>construct_at</tt>/<tt>destroy_at</tt> (and friends_.
 	<br><tab2>Integrate San Diego CWG review notes.
 	<br><tab2> Also rebase on N4778. 
+<br>R6 (drafted at Kona 2019):
+	<br><tab2>Remove non-transient allocation handling because EWG did not
+	    like <tt>mark_immutable_if_constexpr</tt> and the problem of the R4
+	    status quo is potentially difficult to evolve.
 </p>
 
 <h3>Introduction and motivation</h3>
@@ -86,7 +90,7 @@ evaluation completes.
 <p>What about dynamically allocated constexpr storage that hasn't been deallocated by the time evaluation
 completes?  We could that, but there are really compelling use
 cases where this might be desirable. E.g., this could be the basis for a more
-flexible kind of "string literal" class.  We therefore propose that
+flexible kind of "string literal" class.  We therefore proposed that
 a non-transient constexpr allocation be a valid result for a constexpr
 variable initializer if:</p>
 
@@ -107,7 +111,7 @@ is mutable between the completion of the initialization and the	evaluation of
 the destructor.  If the allocation is mutable, reading from that allocation
 during the destructor evaluation is meaningless and should thus not be accepted
 as part of a core constant expression evaluation.  However, there are cases
-where having a mutable allocation is desirable.  So permit both cases, we
+where having a mutable allocation is desirable.  To permit both cases, we
 introduce a library function "std::mark_immutable_if_constexpr" to designate
 that a constexpr allocation is immutable in the context.
 </p>	
@@ -150,12 +154,23 @@ producing an <code>S</code> object that points to a non-transient constexpr
 allocation.  The constexpr evaluation of the destructor would also be
 successful and would deallocate the non-transient allocation. The non-transient
 allocation is therefore promoted to static storage.</p>
+	
+<p>In Kona 2019, this approach was considered to uncertain, and as a
+	result non-transient allocation was removed from the feature
+	set. 
+	
+<br/><tab2>Proposal P0784R5 as presented, for C++20.
+<br/><tab2>SF: 3 | F: 4 | N: 8 | A: 5 | SA: 8
+<br/>
+<br/>Adopt P0784R5 without non-transient allocation into C++20.
+<br/><tab2>SF: 10 | F: 13 | N: 2 | A: 0 | SA: 0
+</p>
 
 <h3>Virtual constexpr destructors</h3>
 <p>In Rapperswil, Peter Dimov proposed (P1077) to let literal types have
 virtual destructors.  That proposal passed easily:
-	<br><tab2>Allowing literal types to have virtual destructors:
-	<br><tab2>SF: 11 | F: 12 | N: 2 | A: 0 | SA: 0
+	<br/><tab2>Allowing literal types to have virtual destructors:
+	<br/><tab2>SF: 11 | F: 12 | N: 2 | A: 0 | SA: 0
 </p>
 <p>The notion of <i>quasi-trivial destructor</i> in P1077, however,
 is subsumed by this paper's notion of <i>constexpr destructor</i>.
@@ -494,29 +509,25 @@ of <code>e2</code> is sequenced before the evaluation of the
  
 <blockquote>&mdash; <ins>a <i>new-expression</i> (7.6.2.4),
 unless the selected allocation function is a replaceable global allocation
-function (16.6.2.1, 16.6.2.2) and either the allocated storage is
-	deallocated within the evaluation of <tt>e</tt> or it
-	is a <i>non-transient constexpr allocation</i> (see below);</ins>
+function (16.6.2.1, 16.6.2.2) and the allocated storage is
+	deallocated within the evaluation of <tt>e</tt>;</ins>
 </blockquote>    
 
 <blockquote>&mdash; a <i>delete-expression (7.6.2.5)</i><ins>
 	unless it deallocates a region of storage allocated
-	within the evaluation of <tt>e</tt> or it deallocates
-	a <i>non-transient constexpr allocation</i> (see below)</ins>;
+	within the evaluation of <tt>e</tt></ins>;
 </blockquote>   
 
 <blockquote>&mdash; <ins>a call to an instance of
 	<tt>std::allocator<T>::allocate</tt> (_allocator.members_),
-unless either the allocated storage is
-	deallocated within the evaluation of <tt>e</tt> or it
-	is a <i>non-transient constexpr allocation</i> (see below);</ins>
+	unless the allocated storage is
+	deallocated within the evaluation of <tt>e</tt>;</ins>
 </blockquote>    
 
 <blockquote>&mdash; <ins>a call to an instance of
 	<tt>std::allocator<T>::deallocate</tt> (_allocator.members_),
 	unless it deallocates a region of storage allocated
-	within the evaluation of <tt>e</tt> or it deallocates
-	a <i>non-transient constexpr allocation</i> (see below)</ins>;
+	within the evaluation of <tt>e</tt>;</ins>
 </blockquote>  
 
 <p><i>
@@ -622,89 +633,5 @@ and the <tt>allocate</tt> and <tt>deallocate</tt> members.</p>
 		
 <p>In [allocator.globals] declare both comparison operators to be <tt>constexpr</tt>.</p>
 
-
-	
-<p><i>
-	<b>Note 5: </b>The following changes enable non-transient
-	allocations and prevent constexpr allocation leaks.
-</i></p>
-
-<p>Add a bullet after bullet (2.8) in [expr.const] paragraph 2:</p>
-<blockquote>...</blockquote>	
-<blockquote><ins>&mdash; an lvalue-to-rvalue conversion (7.3.1) that is applied to a glvalue
-	designating an object in storage S obtained by an invocation of an allocation function
-	during the initialization of a constexpr variable <tt>V</tt> if S has not been
-	marked as immutable by a call to <tt>std::mark_immutable_if_constexpr</tt> and the
-	lvalue-to-rvalue conversion is applied during the evaluation of the hypothetical
-	expression considered when determining whether <tt>V</tt> has constant destruction
-	([expr.const]);</ins>
-</blockquote>  
-	
-<p>Change in bullet (6.2) of [expr.const] paragraph 6 and
-add sub-bullets as follows:
-<blockquote>
-	<ul class="dashed">
-	<li> if the value is of pointer type, it contains
-		<ul class="dashed">
-                <li>the address of an object with static storage duration<del>,</del> <ins>or</ins>
-                    the address past the end such an object (7.6.6), <ins>or</ins></li>
-		<li>the address of a function, or</li>
-                <li>a null pointer value, <ins>or,</ins></li>
-                <li><ins>an address within or past the end of
-                    a non-transient constexpr allocation (as defined below)
-		    and if, for each object stored in the non-transient allocation,
-		    a prvalue core constant expression with the value of the object
-		    would be a constant expression,</ins></li>
-	      and
-	</li></ul>
-</blockquote>
-</p>
-
-<p>Add to end of [expr.const] paragraph 6:
-
-<blockquote>
-   <ins>A <i>non-transient constexpr allocation</i>
-        is a region of storage <i>A</i>
-        obtained by an invocation of an allocation function
-	during the initialization of a constexpr
-        variable <tt>V</tt> of class type or (possibly multi-dimensional) array thereof,
-        but not passed to a deallocation function
-	during that initialization,
-        such that the hypothetical expression considered
-        when determining whether <tt>V</tt> has constant destruction ([expr.const])
-        would deallocate <i>A</i>.
-	Such a non-transient constexpr allocation is
-	<i>immutable</i> if, during the initialization of the constexpr variable,
-	   <tt>std::mark_immutable_if_constexpr</tt> is called with an argument that is
-	   the value returned by the invocation of the allocation function.
-        If <i>A</i> is deallocated except by the implicit invocation of <tt>V</tt>'s
-        destructor, the behavior is undefined.
-	</ins>
-</blockquote>
-</p>
-
-<p>Add a bullet to [temp.arg.nontype] paragraph 2:
-<blockquote>
-	&mdash; a subobject ([intro.object]),<br/>
-	<ins>&mdash; an object stored in a non-transient constexpr allocation (_expr.const_),</ins>
-</blockquote>
-</p>
-	
-<p> Preceding [ptr.launder] add a new subsection
-[alloc.immutable] as follows:</p>
-
-<blockquote><ins>
-<tt>template&lt;class T&gt;<br>
-	<tab><tab>constexpr void mark_immutable_if_constexpr(T* p);</tt><br>
-<br>
-<i>Effects:</i> If called during the initialization of a constexpr
-        variable with an argument that is a pointer value obtained
-		by an invocation of an allocation function during
-		that same initializer and that allocation is
-		a non-transient constexpr allocation, then that
-		allocation is an immutable transient constexpr allocation
-		(_expr.const_).  Otherwise, no effect.
-</ins></blockquote>
-
-</ins></body></html>
+</body></html>
 
